@@ -3,6 +3,7 @@
 namespace App\Livewire\Game;
 
 use App\Http\Resources\MapResource;
+use App\Models\CampaignLevel;
 use App\Models\EnemyType;
 use App\Models\Map;
 use App\Models\TileType;
@@ -10,12 +11,20 @@ use App\Models\TowerType;
 use App\Support\RoadArt;
 use App\Support\TowerUpgrades;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 #[Layout('layouts.game')]
 class Play extends Component
 {
     public ?Map $map = null;
+
+    // Only true when navigated here from the Campaign screen (its level
+    // links append ?campaign=1) — campaign progress must only advance for
+    // that flow, not for any session that happens to play a map which is
+    // ALSO used by a campaign level (e.g. via Free Play or a direct link).
+    #[Url]
+    public bool $campaign = false;
 
     public function mount(?int $mapId = null): void
     {
@@ -56,6 +65,9 @@ class Play extends Component
                 'name' => $enemy->name,
                 'hp' => $enemy->hp,
                 'speed_multiplier' => $enemy->speed_multiplier,
+                'domain' => $enemy->domain,
+                'spawns_code' => $enemy->spawns_code,
+                'spawn_interval' => $enemy->spawn_interval ? (float) $enemy->spawn_interval : null,
                 'bounty' => $enemy->bounty,
                 'render_scale' => (float) $enemy->render_scale,
                 'sprite' => 'data:image/svg+xml;base64,'.base64_encode($enemy->sprite),
@@ -70,6 +82,10 @@ class Play extends Component
                 'damage' => $tower->damage,
                 'range_tiles' => $tower->range_tiles,
                 'fire_interval' => $tower->fire_interval,
+                'splash_damage' => (bool) $tower->splash_damage,
+                'multi_target' => (bool) $tower->multi_target,
+                'targets_ground' => (bool) $tower->targets_ground,
+                'targets_air' => (bool) $tower->targets_air,
                 'cost' => $tower->cost,
                 'render_scale' => (float) $tower->render_scale,
                 'projectile_style' => $tower->projectile_style,
@@ -84,6 +100,18 @@ class Play extends Component
             $mapData['enemy_types'] = $enemyTypes;
             $mapData['tower_types'] = $towerTypes;
             $mapData['starting_gold'] = 150;
+
+            if ($this->campaign) {
+                $order = CampaignLevel::where('map_id', $this->map->id)->value('order');
+                $mapData['campaign_level_order'] = $order;
+
+                if ($order) {
+                    $nextMapId = CampaignLevel::where('order', $order + 1)->value('map_id');
+                    $mapData['campaign_next_url'] = $nextMapId
+                        ? route('game.play', ['mapId' => $nextMapId, 'campaign' => 1])
+                        : null;
+                }
+            }
         }
 
         return view('livewire.game.play', [

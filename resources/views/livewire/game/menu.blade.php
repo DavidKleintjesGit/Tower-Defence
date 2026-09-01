@@ -40,7 +40,7 @@
                 <path d="M12 2v3.5M12 18.5V22M2 12h3.5M18.5 12H22"/>
             </svg>
             <span class="text-[10px] font-black uppercase tracking-widest text-emerald-300 sm:text-xs">Armory</span>
-            <span class="hidden text-[9px] uppercase tracking-wide text-slate-500 sm:block">Wapens</span>
+            <span class="hidden text-[9px] uppercase tracking-wide text-slate-500 sm:block">Weapons</span>
         </a>
     </div>
 
@@ -65,32 +65,60 @@
             <p class="mt-1 text-base uppercase tracking-[0.4em] text-sky-300 sm:text-lg">Tower Defense</p>
         </div>
 
-        <nav class="w-full max-w-md space-y-3">
+        {{-- Arrow keys move `selected` between the 4 items, Enter clicks the
+        matching x-ref so Livewire's wire:navigate handling fires normally
+        (a real click(), not a raw location.href jump). Hovering an item
+        also updates `selected` so mouse and keyboard stay in sync. --}}
+        <nav
+            x-data="{ selected: 0, count: 4 }"
+            @keydown.window.arrow-down.prevent="selected = (selected + 1) % count"
+            @keydown.window.arrow-up.prevent="selected = (selected - 1 + count) % count"
+            @keydown.window.enter.prevent="$refs['item' + selected]?.click()"
+            class="w-full max-w-md space-y-3"
+        >
             <a
-                href="{{ route('game.play') }}"
+                x-ref="item0"
+                @mouseenter="selected = 0"
+                href="{{ route('game.campaign') }}"
                 wire:navigate
-                class="group flex w-full items-center gap-4 rounded-md border border-emerald-400 bg-emerald-500/10 px-5 py-3.5 text-left backdrop-blur-sm transition hover:bg-emerald-500/20"
+                class="group flex w-full items-center gap-4 rounded-md border px-5 py-3.5 text-left backdrop-blur-sm transition"
+                :class="selected === 0 ? 'border-emerald-400 bg-emerald-500/20' : 'border-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20'"
             >
-                <x-menu-panel-content icon="play" label="Spelen" />
+                <x-menu-panel-content icon="route" label="Campaign" />
             </a>
 
             <a
+                x-ref="item1"
+                @mouseenter="selected = 1"
                 href="{{ route('game.free-play') }}"
                 wire:navigate
-                class="group flex w-full items-center gap-4 rounded-md border border-emerald-500/30 bg-slate-950/60 px-5 py-3.5 text-left backdrop-blur-sm transition hover:border-emerald-400 hover:bg-emerald-500/10"
+                class="group flex w-full items-center gap-4 rounded-md border px-5 py-3.5 text-left backdrop-blur-sm transition"
+                :class="selected === 1 ? 'border-emerald-400 bg-emerald-500/20' : 'border-emerald-500/30 bg-slate-950/60 hover:border-emerald-400 hover:bg-emerald-500/10'"
             >
                 <x-menu-panel-content icon="grid" label="Free Play" />
             </a>
 
             <a
+                x-ref="item2"
+                @mouseenter="selected = 2"
                 href="{{ route('game.sandbox-select') }}"
                 wire:navigate
-                class="group flex w-full items-center gap-4 rounded-md border border-emerald-500/30 bg-slate-950/60 px-5 py-3.5 text-left backdrop-blur-sm transition hover:border-emerald-400 hover:bg-emerald-500/10"
+                class="group flex w-full items-center gap-4 rounded-md border px-5 py-3.5 text-left backdrop-blur-sm transition"
+                :class="selected === 2 ? 'border-emerald-400 bg-emerald-500/20' : 'border-emerald-500/30 bg-slate-950/60 hover:border-emerald-400 hover:bg-emerald-500/10'"
             >
                 <x-menu-panel-content icon="flask" label="Sandbox" />
             </a>
 
-            <livewire:game.coming-soon-notice label="Instellingen" icon="gear" wire:key="menu-settings" />
+            <a
+                x-ref="item3"
+                @mouseenter="selected = 3"
+                href="{{ route('game.settings') }}"
+                wire:navigate
+                class="group flex w-full items-center gap-4 rounded-md border px-5 py-3.5 text-left backdrop-blur-sm transition"
+                :class="selected === 3 ? 'border-emerald-400 bg-emerald-500/20' : 'border-emerald-500/30 bg-slate-950/60 hover:border-emerald-400 hover:bg-emerald-500/10'"
+            >
+                <x-menu-panel-content icon="gear" label="Settings" />
+            </a>
         </nav>
 
         <div class="flex w-full max-w-md flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[10px] uppercase tracking-widest text-emerald-500/70 sm:flex-nowrap sm:justify-between">
@@ -102,7 +130,7 @@
                     @endfor
                 </span>
             </div>
-            <span class="hidden sm:inline">Druk op enter om te starten</span>
+            <span class="hidden sm:inline">Press enter to start</span>
             <span class="flex items-center gap-1.5">
                 <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400"></span>
                 Secure feed

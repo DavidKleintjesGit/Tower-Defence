@@ -12,12 +12,18 @@ class RoadArt
         'road-cracked' => ['surface' => '#33312c', 'edgeLight' => '#4a463d', 'edgeDark' => '#1c1a17', 'stripe' => '#8a7a5c', 'style' => 'paved', 'halfWidth' => 5, 'stripeWidth' => 4, 'cracked' => true],
         'road-wide' => ['surface' => '#3a3a40', 'edgeLight' => '#57575f', 'edgeDark' => '#26262a', 'stripe' => '#f2c94c', 'style' => 'paved', 'halfWidth' => 10, 'stripeWidth' => 6],
         'road-dirt' => ['surface' => '#b8925a', 'track' => '#8f6d3f', 'style' => 'dirt', 'halfWidth' => 5],
+        // Indoor walkway — same gray as concreteFloorSprite()'s base so a
+        // painted walking lane reads as "this exact floor", not asphalt.
+        'corridor-path' => ['surface' => '#71717a', 'edgeLight' => '#a1a1aa', 'edgeDark' => '#52525b', 'stripe' => '#f2c94c', 'style' => 'paved', 'halfWidth' => 6, 'stripeWidth' => 3],
     ];
 
     private const FENCE_PALETTES = [
         'fence' => ['type' => 'mesh', 'post' => '#5b5f63', 'postLight' => '#787c80', 'rail' => '#6b6f73', 'mesh' => '#3f4246'],
         'fence-barbed' => ['type' => 'barbed', 'post' => '#5b5f63', 'postLight' => '#787c80', 'rail' => '#6b6f73', 'mesh' => '#3f4246', 'barb' => '#b45309'],
         'concrete-wall' => ['type' => 'wall', 'face' => '#9a9a9a', 'faceLight' => '#b8b8b8', 'faceDark' => '#6f6f6f', 'seam' => '#7f7f7f'],
+        'lab-wall' => ['type' => 'wall', 'face' => '#e5e7eb', 'faceLight' => '#f9fafb', 'faceDark' => '#9ca3af', 'seam' => '#cbd5e1'],
+        'steel-wall' => ['type' => 'wall', 'face' => '#6b7280', 'faceLight' => '#9ca3af', 'faceDark' => '#374151', 'seam' => '#4b5563'],
+        'glass-wall' => ['type' => 'glass', 'frame' => '#374151', 'glass' => '#7dd3fc'],
     ];
 
     public static function roadAssets(string $code): array
@@ -77,6 +83,11 @@ class RoadArt
     private static function rect(float $x, float $y, float $w, float $h, string $fill): string
     {
         return '<rect x="'.$x.'" y="'.$y.'" width="'.$w.'" height="'.$h.'" fill="'.$fill.'"/>';
+    }
+
+    private static function rectOp(float $x, float $y, float $w, float $h, string $fill, float $opacity): string
+    {
+        return '<rect x="'.$x.'" y="'.$y.'" width="'.$w.'" height="'.$h.'" fill="'.$fill.'" opacity="'.$opacity.'"/>';
     }
 
     // Every arm is drawn as a straight band from the tile's outer edge all
@@ -211,6 +222,7 @@ class RoadArt
     {
         return match ($palette['type'] ?? 'mesh') {
             'wall' => self::wallJunction($arms, $palette),
+            'glass' => self::glassJunction($arms, $palette),
             'barbed' => self::meshJunction($arms, $palette, true),
             default => self::meshJunction($arms, $palette, false),
         };
@@ -288,6 +300,41 @@ class RoadArt
             $parts[] = self::rect(22, 10, 10, 12, $face);
             $parts[] = self::rect(22, 10, 10, 2, $faceLight);
             $parts[] = self::rect(22, 15, 10, 1, $seam);
+        }
+
+        return self::svg(implode('', $parts));
+    }
+
+    // Same hub-to-edge geometry as wallJunction, but every segment gets a
+    // translucent glass pane inset inside a dark frame instead of a solid
+    // opaque face — for observation-room walls where you want to see through.
+    private static function glassJunction(array $arms, array $palette): string
+    {
+        $frame = $palette['frame'];
+        $glass = $palette['glass'];
+        $parts = [
+            self::rect(10, 10, 12, 12, $frame),
+            self::rectOp(12, 12, 8, 8, $glass, 0.45),
+        ];
+
+        if ($arms['u']) {
+            $parts[] = self::rect(10, 0, 12, 10, $frame);
+            $parts[] = self::rectOp(12, 0, 8, 10, $glass, 0.45);
+        }
+
+        if ($arms['d']) {
+            $parts[] = self::rect(10, 22, 12, 10, $frame);
+            $parts[] = self::rectOp(12, 22, 8, 10, $glass, 0.45);
+        }
+
+        if ($arms['l']) {
+            $parts[] = self::rect(0, 10, 10, 12, $frame);
+            $parts[] = self::rectOp(0, 12, 10, 8, $glass, 0.45);
+        }
+
+        if ($arms['r']) {
+            $parts[] = self::rect(22, 10, 10, 12, $frame);
+            $parts[] = self::rectOp(22, 12, 10, 8, $glass, 0.45);
         }
 
         return self::svg(implode('', $parts));

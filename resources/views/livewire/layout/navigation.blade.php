@@ -46,7 +46,15 @@ new class extends Component
             wire:navigate
             class="flex items-center rounded-md px-3 py-2 text-sm font-medium transition {{ request()->routeIs('admin.tile-types.*') ? 'bg-emerald-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}"
         >
-            Objecten
+            Objects
+        </a>
+
+        <a
+            href="{{ route('admin.equipment.index') }}"
+            wire:navigate
+            class="flex items-center rounded-md px-3 py-2 text-sm font-medium transition {{ request()->routeIs('admin.equipment.*') ? 'bg-emerald-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}"
+        >
+            Weapons & Monsters
         </a>
     </nav>
 

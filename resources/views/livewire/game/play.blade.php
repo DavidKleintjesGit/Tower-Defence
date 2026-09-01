@@ -2,16 +2,16 @@
     @if (! $map)
         <div class="flex h-full flex-col items-center justify-center gap-6 px-4 text-center">
             <p class="text-sm uppercase tracking-[0.3em] text-emerald-400">Top secret // clearance required</p>
-            <h1 class="mt-2 text-2xl font-bold uppercase tracking-widest text-emerald-300">Geen speelbare map</h1>
+            <h1 class="mt-2 text-2xl font-bold uppercase tracking-widest text-emerald-300">No playable map</h1>
             <p class="mt-3 max-w-sm text-sm text-slate-400">
-                Er is nog geen gepubliceerde map. Maak en publiceer er een in de adminomgeving.
+                There's no published map yet. Create and publish one in the admin panel.
             </p>
             <a
                 href="{{ route('home') }}"
                 wire:navigate
                 class="mt-6 inline-block rounded-md border border-emerald-500/40 px-4 py-2 text-sm text-emerald-300 transition hover:border-emerald-400 hover:bg-slate-800"
             >
-                &larr; Terug naar menu
+                &larr; Back to menu
             </a>
         </div>
     @else
@@ -24,11 +24,11 @@
 
             <div class="flex items-center gap-4 text-xs sm:text-sm">
                 <span class="flex items-center gap-1.5 text-slate-300">
-                    <span class="text-slate-500">Levens</span>
+                    <span class="text-slate-500">Lives</span>
                     <span id="game-lives" class="font-bold text-red-400">10</span>
                 </span>
                 <span class="flex items-center gap-1.5 text-slate-300">
-                    <span class="text-slate-500">Geld</span>
+                    <span class="text-slate-500">Gold</span>
                     <span id="game-gold" class="font-bold text-yellow-400">0</span>
                 </span>
                 <span class="hidden items-center gap-1.5 text-slate-300 md:flex">
@@ -36,11 +36,20 @@
                     <span id="game-wave-info" class="font-bold text-emerald-300">-</span>
                 </span>
                 <button
-                    id="game-wave-btn"
+                    id="game-speed-btn"
                     type="button"
-                    class="rounded-md border border-emerald-500/40 px-3 py-1.5 text-xs font-medium text-emerald-300 transition hover:border-emerald-400 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                    title="Game speed"
+                    class="rounded-md border border-slate-700 bg-slate-800 px-2.5 py-1.5 text-xs font-bold text-slate-300 transition hover:border-emerald-400 hover:bg-slate-700"
                 >
-                    Start wave 1
+                    1x
+                </button>
+                <button
+                    id="game-pause-btn"
+                    type="button"
+                    title="Pause"
+                    class="rounded-md border border-slate-700 bg-slate-800 px-2.5 py-1.5 text-xs font-bold text-slate-300 transition hover:border-emerald-400 hover:bg-slate-700"
+                >
+                    Pause
                 </button>
             </div>
         </div>
@@ -79,23 +88,47 @@
 
                 <div id="game-over-overlay" class="absolute inset-0 hidden flex-col items-center justify-center gap-4 bg-black/80">
                     <p class="text-2xl font-bold uppercase tracking-widest text-red-400">Game Over</p>
+                    <p id="game-over-stats" class="text-sm text-slate-400"></p>
                     <button id="game-restart-btn" type="button" class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-500">
-                        Opnieuw
+                        Restart
                     </button>
                 </div>
 
                 <div id="game-victory-overlay" class="absolute inset-0 hidden flex-col items-center justify-center gap-4 bg-black/80">
-                    <p class="text-2xl font-bold uppercase tracking-widest text-emerald-300">Overwinning!</p>
-                    <button id="game-victory-restart-btn" type="button" class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-500">
-                        Opnieuw
-                    </button>
+                    <p class="text-2xl font-bold uppercase tracking-widest text-emerald-300">Victory!</p>
+                    <p id="game-victory-stats" class="text-sm text-slate-400"></p>
+                    <div class="flex items-center gap-3">
+                        <button id="game-victory-restart-btn" type="button" class="rounded-md bg-slate-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-600">
+                            Restart
+                        </button>
+                        @if (! empty($mapData['campaign_next_url'] ?? null))
+                            <a href="{{ $mapData['campaign_next_url'] }}" wire:navigate class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-500">
+                                Next Level &rarr;
+                            </a>
+                        @endif
+                    </div>
                 </div>
+
+                <div
+                    id="game-wave-preview"
+                    class="absolute bottom-20 left-1/2 z-10 hidden -translate-x-1/2 items-center gap-1.5 rounded-full border border-slate-700 bg-slate-900/85 px-3 py-1.5 backdrop-blur-sm"
+                ></div>
+
+                {{-- Big, hard-to-miss call to action instead of a small ghost
+                button buried in the top bar. --}}
+                <button
+                    id="game-wave-btn"
+                    type="button"
+                    class="absolute bottom-5 left-1/2 z-10 -translate-x-1/2 animate-pulse rounded-full border-2 border-emerald-400 bg-emerald-500/20 px-8 py-3.5 text-base font-black uppercase tracking-widest text-emerald-200 shadow-[0_0_25px_rgba(16,185,129,0.5)] backdrop-blur-sm transition hover:animate-none hover:bg-emerald-500/30 disabled:cursor-not-allowed disabled:animate-none disabled:opacity-50"
+                >
+                    Start wave 1
+                </button>
 
                 {{-- Overlays the map instead of taking up flex layout space, so
                 opening it doesn't shrink/shift the canvas. --}}
                 <div id="tower-detail-sidebar" class="absolute inset-y-0 right-0 z-20 hidden w-64 flex-col overflow-y-auto border-l border-emerald-500/20 bg-slate-900/95 p-4 shadow-2xl shadow-black/60 sm:w-72">
                     <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold uppercase tracking-widest text-emerald-400">Toren</span>
+                        <span class="text-xs font-bold uppercase tracking-widest text-emerald-400">Tower</span>
                         <button id="tower-detail-close" type="button" class="text-slate-500 hover:text-slate-300">&times;</button>
                     </div>
 
@@ -107,19 +140,19 @@
 
                     <dl class="mt-4 grid grid-cols-2 gap-3 border-t border-slate-800 pt-3 text-center text-xs">
                         <div>
-                            <dt class="uppercase tracking-wide text-slate-500">Schade</dt>
+                            <dt class="uppercase tracking-wide text-slate-500">Damage</dt>
                             <dd id="tower-detail-damage" class="mt-0.5 text-base font-bold text-slate-100"></dd>
                         </div>
                         <div>
-                            <dt class="uppercase tracking-wide text-slate-500">Bereik</dt>
+                            <dt class="uppercase tracking-wide text-slate-500">Range</dt>
                             <dd id="tower-detail-range" class="mt-0.5 text-base font-bold text-slate-100"></dd>
                         </div>
                         <div>
-                            <dt class="uppercase tracking-wide text-slate-500">Vuursnelheid</dt>
+                            <dt class="uppercase tracking-wide text-slate-500">Fire rate</dt>
                             <dd id="tower-detail-rate" class="mt-0.5 text-base font-bold text-slate-100"></dd>
                         </div>
                         <div>
-                            <dt class="uppercase tracking-wide text-slate-500">Kosten</dt>
+                            <dt class="uppercase tracking-wide text-slate-500">Cost</dt>
                             <dd id="tower-detail-cost" class="mt-0.5 text-base font-bold text-yellow-400"></dd>
                         </div>
                     </dl>
@@ -133,12 +166,20 @@
                         >
                             Upgrade &mdash; <span id="tower-upgrade-cost"></span>
                         </button>
+
+                        <button
+                            id="tower-sell-btn"
+                            type="button"
+                            class="mt-2 w-full rounded-md border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs font-bold uppercase tracking-wide text-red-300 transition hover:bg-red-500/20"
+                        >
+                            Sell &mdash; <span id="tower-sell-amount"></span>
+                        </button>
                     </div>
                 </div>
             </div>
 
             <div id="game-sidebar" class="relative z-20 flex w-28 shrink-0 flex-col gap-2 overflow-y-auto border-l border-emerald-500/20 bg-slate-900/95 p-2 sm:w-32">
-                <p class="text-center text-[9px] uppercase tracking-widest text-slate-500">Wapens</p>
+                <p class="text-center text-[9px] uppercase tracking-widest text-slate-500">Weapons</p>
 
                 <div id="weapon-palette" class="flex flex-col gap-2">
                     @foreach ($towerTypes as $tower)
@@ -146,7 +187,7 @@
                             class="weapon-palette-item flex h-24 w-full shrink-0 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-md border border-emerald-500/30 bg-slate-950/70 p-1.5 text-center transition hover:border-emerald-400"
                             data-tower-code="{{ $tower['code'] }}"
                             data-tower-cost="{{ $tower['cost'] }}"
-                            title="{{ $tower['name'] }}: {{ $tower['damage'] }} schade, {{ number_format($tower['range_tiles'], 1) }} bereik"
+                            title="{{ $tower['name'] }}: {{ $tower['damage'] }} damage, {{ number_format($tower['range_tiles'], 1) }} range"
                         >
                             <img src="{{ $tower['sprite'] }}" alt="{{ $tower['name'] }}" class="h-8 w-8 shrink-0" style="image-rendering: pixelated">
                             <span class="w-full truncate text-[9px] font-semibold uppercase tracking-wide text-emerald-300">{{ $tower['name'] }}</span>
@@ -156,7 +197,7 @@
                 </div>
 
                 <div class="mt-auto text-center text-[9px] uppercase leading-tight tracking-widest text-slate-600">
-                    Special moves<br>binnenkort
+                    Special moves<br>coming soon
                 </div>
             </div>
         </div>

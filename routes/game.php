@@ -1,12 +1,15 @@
 <?php
 
+use App\Http\Controllers\CampaignController;
 use App\Livewire\Game\Armory;
 use App\Livewire\Game\Bestiary;
+use App\Livewire\Game\Campaign;
 use App\Livewire\Game\FreePlay;
 use App\Livewire\Game\Menu;
 use App\Livewire\Game\Play;
 use App\Livewire\Game\Sandbox;
 use App\Livewire\Game\SandboxSelect;
+use App\Livewire\Game\Settings;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', Menu::class)->name('home');
@@ -16,3 +19,6 @@ Route::get('sandbox-select', SandboxSelect::class)->name('game.sandbox-select');
 Route::get('sandbox/{mapId?}', Sandbox::class)->name('game.sandbox');
 Route::get('bestiary', Bestiary::class)->name('game.bestiary');
 Route::get('armory', Armory::class)->name('game.armory');
+Route::get('campaign', Campaign::class)->name('game.campaign');
+Route::get('settings', Settings::class)->name('game.settings');
+Route::post('campaign/{order}/complete', [CampaignController::class, 'complete'])->name('campaign.complete');

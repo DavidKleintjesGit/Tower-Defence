@@ -2,33 +2,49 @@
     @if (! $map)
         <div class="flex h-full flex-col items-center justify-center gap-6 px-4 text-center">
             <p class="text-sm uppercase tracking-[0.3em] text-emerald-400">Top secret // clearance required</p>
-            <h1 class="mt-2 text-2xl font-bold uppercase tracking-widest text-emerald-300">Geen map gevonden</h1>
+            <h1 class="mt-2 text-2xl font-bold uppercase tracking-widest text-emerald-300">No map found</h1>
             <a
                 href="{{ route('game.sandbox-select') }}"
                 wire:navigate
                 class="mt-6 inline-block rounded-md border border-emerald-500/40 px-4 py-2 text-sm text-emerald-300 transition hover:border-emerald-400 hover:bg-slate-800"
             >
-                &larr; Kies een andere map
+                &larr; Choose another map
             </a>
         </div>
     @else
         <div id="game-topbar" class="relative z-20 flex h-14 shrink-0 items-center justify-between gap-4 border-b border-emerald-500/20 bg-slate-900/95 px-4">
             <a href="{{ route('game.sandbox-select') }}" wire:navigate class="text-sm text-slate-400 hover:text-slate-200">
-                &larr; Andere map
+                &larr; Other map
             </a>
 
             <h1 class="hidden text-sm font-bold uppercase tracking-widest text-emerald-300 sm:block">{{ $map->name }}</h1>
 
             <div class="flex items-center gap-3">
                 <span class="rounded-full border border-sky-500/40 bg-sky-500/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-sky-300">
-                    Sandbox &mdash; alles gratis
+                    Sandbox &mdash; everything free
                 </span>
+                <button
+                    id="game-speed-btn"
+                    type="button"
+                    title="Game speed"
+                    class="rounded-md border border-slate-700 bg-slate-800 px-2.5 py-1.5 text-xs font-bold text-slate-300 transition hover:border-emerald-400 hover:bg-slate-700"
+                >
+                    1x
+                </button>
+                <button
+                    id="game-pause-btn"
+                    type="button"
+                    title="Pause"
+                    class="rounded-md border border-slate-700 bg-slate-800 px-2.5 py-1.5 text-xs font-bold text-slate-300 transition hover:border-emerald-400 hover:bg-slate-700"
+                >
+                    Pause
+                </button>
                 <button
                     id="sandbox-clear-btn"
                     type="button"
                     class="rounded-md border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:bg-slate-700"
                 >
-                    Wis alles
+                    Clear all
                 </button>
             </div>
         </div>
@@ -43,7 +59,7 @@
                             type="button"
                             class="monster-palette-item flex h-24 w-full shrink-0 flex-col items-center justify-center gap-0.5 rounded-md border border-emerald-500/30 bg-slate-950/70 p-1.5 text-center transition hover:border-emerald-400"
                             data-enemy-code="{{ $enemy['code'] }}"
-                            title="{{ $enemy['name'] }}: klik om te spawnen"
+                            title="{{ $enemy['name'] }}: click to spawn"
                         >
                             <img src="{{ $enemy['sprite'] }}" alt="{{ $enemy['name'] }}" class="h-8 w-8 shrink-0" style="image-rendering: pixelated">
                             <span class="w-full truncate text-[9px] font-semibold uppercase tracking-wide text-emerald-300">{{ $enemy['name'] }}</span>
@@ -88,7 +104,7 @@
                 opening it doesn't shrink/shift the canvas. --}}
                 <div id="tower-detail-sidebar" class="absolute inset-y-0 right-0 z-20 hidden w-64 flex-col overflow-y-auto border-l border-emerald-500/20 bg-slate-900/95 p-4 shadow-2xl shadow-black/60 sm:w-72">
                     <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold uppercase tracking-widest text-emerald-400">Toren</span>
+                        <span class="text-xs font-bold uppercase tracking-widest text-emerald-400">Tower</span>
                         <button id="tower-detail-close" type="button" class="text-slate-500 hover:text-slate-300">&times;</button>
                     </div>
 
@@ -100,19 +116,19 @@
 
                     <dl class="mt-4 grid grid-cols-2 gap-3 border-t border-slate-800 pt-3 text-center text-xs">
                         <div>
-                            <dt class="uppercase tracking-wide text-slate-500">Schade</dt>
+                            <dt class="uppercase tracking-wide text-slate-500">Damage</dt>
                             <dd id="tower-detail-damage" class="mt-0.5 text-base font-bold text-slate-100"></dd>
                         </div>
                         <div>
-                            <dt class="uppercase tracking-wide text-slate-500">Bereik</dt>
+                            <dt class="uppercase tracking-wide text-slate-500">Range</dt>
                             <dd id="tower-detail-range" class="mt-0.5 text-base font-bold text-slate-100"></dd>
                         </div>
                         <div>
-                            <dt class="uppercase tracking-wide text-slate-500">Vuursnelheid</dt>
+                            <dt class="uppercase tracking-wide text-slate-500">Fire rate</dt>
                             <dd id="tower-detail-rate" class="mt-0.5 text-base font-bold text-slate-100"></dd>
                         </div>
                         <div>
-                            <dt class="uppercase tracking-wide text-slate-500">Kosten</dt>
+                            <dt class="uppercase tracking-wide text-slate-500">Cost</dt>
                             <dd id="tower-detail-cost" class="mt-0.5 text-base font-bold text-yellow-400"></dd>
                         </div>
                     </dl>
@@ -126,12 +142,20 @@
                         >
                             Upgrade &mdash; <span id="tower-upgrade-cost"></span>
                         </button>
+
+                        <button
+                            id="tower-sell-btn"
+                            type="button"
+                            class="mt-2 w-full rounded-md border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs font-bold uppercase tracking-wide text-red-300 transition hover:bg-red-500/20"
+                        >
+                            Sell &mdash; <span id="tower-sell-amount"></span>
+                        </button>
                     </div>
                 </div>
             </div>
 
             <div id="game-sidebar" class="relative z-20 flex w-28 shrink-0 flex-col gap-2 overflow-y-auto border-l border-emerald-500/20 bg-slate-900/95 p-2 sm:w-32">
-                <p class="text-center text-[9px] uppercase tracking-widest text-slate-500">Wapens</p>
+                <p class="text-center text-[9px] uppercase tracking-widest text-slate-500">Weapons</p>
 
                 <div id="weapon-palette" class="flex flex-col gap-2">
                     @foreach ($towerTypes as $tower)
@@ -139,11 +163,11 @@
                             class="weapon-palette-item flex h-24 w-full shrink-0 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-md border border-emerald-500/30 bg-slate-950/70 p-1.5 text-center transition hover:border-emerald-400"
                             data-tower-code="{{ $tower['code'] }}"
                             data-tower-cost="{{ $tower['cost'] }}"
-                            title="{{ $tower['name'] }}: {{ $tower['damage'] }} schade, {{ number_format($tower['range_tiles'], 1) }} bereik"
+                            title="{{ $tower['name'] }}: {{ $tower['damage'] }} damage, {{ number_format($tower['range_tiles'], 1) }} range"
                         >
                             <img src="{{ $tower['sprite'] }}" alt="{{ $tower['name'] }}" class="h-8 w-8 shrink-0" style="image-rendering: pixelated">
                             <span class="w-full truncate text-[9px] font-semibold uppercase tracking-wide text-emerald-300">{{ $tower['name'] }}</span>
-                            <span class="text-[9px] font-bold text-sky-400">Gratis</span>
+                            <span class="text-[9px] font-bold text-sky-400">Free</span>
                         </div>
                     @endforeach
                 </div>

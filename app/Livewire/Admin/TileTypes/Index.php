@@ -92,7 +92,7 @@ class Index extends Component
                 'required', 'string', 'max:255', 'alpha_dash',
                 function ($attribute, $value, $fail) {
                     if (TileType::where('code', $value)->exists()) {
-                        $fail('Deze code bestaat al.');
+                        $fail('This code already exists.');
                     }
                 },
             ],

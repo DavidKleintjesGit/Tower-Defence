@@ -47,6 +47,7 @@ class TileTypeSeeder extends Seeder
             ['code' => 'road-cracked', 'category' => 'road', 'label' => 'Gebarsten weg', 'color' => '#33312c', 'is_buildable' => false, 'sprite' => $this->roadCrackedSprite()],
             ['code' => 'road-wide', 'category' => 'road', 'label' => 'Brede weg', 'color' => '#3a3a40', 'is_buildable' => false, 'sprite' => $this->roadWideSprite()],
             ['code' => 'road-dirt', 'category' => 'road', 'label' => 'Zandweg', 'color' => '#b8925a', 'is_buildable' => false, 'sprite' => $this->roadDirtSprite()],
+            ['code' => 'corridor-path', 'category' => 'road', 'label' => 'Looppad (binnen)', 'color' => '#71717a', 'is_buildable' => false, 'sprite' => $this->corridorPathSprite()],
 
             // Muren-skins (volledige autotile-set via RoadArt)
             ['code' => 'concrete-wall', 'category' => 'fence', 'label' => 'Betonmuur', 'color' => '#9a9a9a', 'is_buildable' => false, 'sprite' => $this->concreteWallSprite(), 'render_scale' => 1.8],
@@ -89,6 +90,52 @@ class TileTypeSeeder extends Seeder
             ['code' => 'fuel-tank', 'category' => 'decoration', 'label' => 'Brandstoftank', 'color' => '#9ca3af', 'is_buildable' => false, 'sprite' => $this->fuelTankSprite(), 'render_scale' => 1.8],
             ['code' => 'solar-panel', 'category' => 'decoration', 'label' => 'Zonnepaneel', 'color' => '#1f2937', 'is_buildable' => false, 'sprite' => $this->solarPanelSprite(), 'render_scale' => 1.6],
             ['code' => 'security-camera', 'category' => 'decoration', 'label' => 'Bewakingscamera', 'color' => '#4b5563', 'is_buildable' => false, 'sprite' => $this->securityCameraSprite(), 'render_scale' => 1.4],
+
+            // Interieur-vloeren
+            ['code' => 'lab-floor-tile', 'category' => 'ground', 'label' => 'Labtegel', 'color' => '#e5e7eb', 'is_buildable' => true, 'sprite' => $this->labFloorTileSprite()],
+            ['code' => 'lab-floor-grate', 'category' => 'ground', 'label' => 'Roostervloer', 'color' => '#374151', 'is_buildable' => true, 'sprite' => $this->labFloorGrateSprite()],
+            ['code' => 'rubber-floor', 'category' => 'ground', 'label' => 'Rubberen vloer', 'color' => '#27272a', 'is_buildable' => true, 'sprite' => $this->rubberFloorSprite()],
+            ['code' => 'hazard-floor', 'category' => 'ground', 'label' => 'Gevarenvloer', 'color' => '#f2c227', 'is_buildable' => true, 'sprite' => $this->hazardFloorSprite()],
+            ['code' => 'blood-floor', 'category' => 'ground', 'label' => 'Bebloede vloer', 'color' => '#52504a', 'is_buildable' => true, 'sprite' => $this->bloodFloorSprite()],
+            ['code' => 'concrete-floor', 'category' => 'ground', 'label' => 'Betonvloer', 'color' => '#71717a', 'is_buildable' => true, 'sprite' => $this->concreteFloorSprite()],
+
+            // Interieur-wanden (volledige autotile-set via RoadArt)
+            ['code' => 'lab-wall', 'category' => 'fence', 'label' => 'Labwand', 'color' => '#e5e7eb', 'is_buildable' => false, 'sprite' => $this->labWallSprite(), 'render_scale' => 1.8],
+            ['code' => 'steel-wall', 'category' => 'fence', 'label' => 'Stalen wand', 'color' => '#6b7280', 'is_buildable' => false, 'sprite' => $this->steelWallSprite(), 'render_scale' => 1.8],
+            ['code' => 'glass-wall', 'category' => 'fence', 'label' => 'Observatieruit', 'color' => '#7dd3fc', 'is_buildable' => false, 'sprite' => $this->glassWallSprite(), 'render_scale' => 1.8],
+
+            // Interieur-deuren (losse objecten, niet auto-tiled)
+            ['code' => 'door-sliding', 'category' => 'decoration', 'label' => 'Schuifdeur', 'color' => '#6b7280', 'is_buildable' => false, 'sprite' => $this->doorSlidingSprite(), 'render_scale' => 1.8],
+            ['code' => 'door-blast', 'category' => 'decoration', 'label' => 'Blastdeur', 'color' => '#4b5563', 'is_buildable' => false, 'sprite' => $this->doorBlastSprite(), 'render_scale' => 1.8],
+            ['code' => 'door-cell', 'category' => 'decoration', 'label' => 'Celdeur', 'color' => '#27272a', 'is_buildable' => false, 'sprite' => $this->doorCellSprite(), 'render_scale' => 1.8],
+            ['code' => 'door-keycard', 'category' => 'decoration', 'label' => 'Keycard-deur', 'color' => '#9ca3af', 'is_buildable' => false, 'sprite' => $this->doorKeycardSprite(), 'render_scale' => 1.8],
+
+            // Interieur-meubilair & props
+            ['code' => 'lab-table', 'category' => 'decoration', 'label' => 'Labtafel', 'color' => '#cbd5e1', 'is_buildable' => false, 'sprite' => $this->labTableSprite(), 'render_scale' => 1.8],
+            ['code' => 'computer-terminal', 'category' => 'decoration', 'label' => 'Computerterminal', 'color' => '#1f2937', 'is_buildable' => false, 'sprite' => $this->computerTerminalSprite(), 'render_scale' => 1.6],
+            ['code' => 'specimen-tank', 'category' => 'decoration', 'label' => 'Specimentank', 'color' => '#34d399', 'is_buildable' => false, 'sprite' => $this->specimenTankSprite(), 'render_scale' => 1.6],
+            ['code' => 'filing-cabinet', 'category' => 'decoration', 'label' => 'Archiefkast', 'color' => '#6b7280', 'is_buildable' => false, 'sprite' => $this->filingCabinetSprite(), 'render_scale' => 1.6],
+            ['code' => 'stretcher', 'category' => 'decoration', 'label' => 'Brancard', 'color' => '#e5e7eb', 'is_buildable' => false, 'sprite' => $this->stretcherSprite(), 'render_scale' => 1.8],
+            ['code' => 'ceiling-light', 'category' => 'decoration', 'label' => 'Plafondlamp', 'color' => '#fef3c7', 'is_buildable' => false, 'sprite' => $this->ceilingLightSprite(), 'render_scale' => 1.8],
+            ['code' => 'alarm-light', 'category' => 'decoration', 'label' => 'Alarmlicht', 'color' => '#ef4444', 'is_buildable' => false, 'sprite' => $this->alarmLightSprite(), 'render_scale' => 1.6],
+            ['code' => 'vent-grate', 'category' => 'decoration', 'label' => 'Ventilatierooster', 'color' => '#4b5563', 'is_buildable' => false, 'sprite' => $this->ventGrateSprite(), 'render_scale' => 1.8],
+            ['code' => 'pipes', 'category' => 'decoration', 'label' => 'Leidingwerk', 'color' => '#6b7280', 'is_buildable' => false, 'sprite' => $this->pipesSprite(), 'render_scale' => 1.8],
+            ['code' => 'cell-bars', 'category' => 'decoration', 'label' => 'Celtralies', 'color' => '#3f3f46', 'is_buildable' => false, 'sprite' => $this->cellBarsSprite(), 'render_scale' => 1.8],
+            ['code' => 'whiteboard', 'category' => 'decoration', 'label' => 'Whiteboard', 'color' => '#f8fafc', 'is_buildable' => false, 'sprite' => $this->whiteboardSprite(), 'render_scale' => 1.8],
+            ['code' => 'office-chair', 'category' => 'decoration', 'label' => 'Bureaustoel', 'color' => '#374151', 'is_buildable' => false, 'sprite' => $this->officeChairSprite(), 'render_scale' => 1.4],
+
+            // Exterieur: extra grondtegels
+            ['code' => 'parking-lines', 'category' => 'ground', 'label' => 'Parkeervak', 'color' => '#4b4b52', 'is_buildable' => true, 'sprite' => $this->parkingLinesSprite()],
+            ['code' => 'oil-stain', 'category' => 'ground', 'label' => 'Olievlek', 'color' => '#4b4b52', 'is_buildable' => true, 'sprite' => $this->oilStainSprite()],
+            ['code' => 'salt-flat', 'category' => 'ground', 'label' => 'Zoutvlakte', 'color' => '#e5e1d3', 'is_buildable' => true, 'sprite' => $this->saltFlatSprite()],
+            ['code' => 'canyon-rock', 'category' => 'ground', 'label' => 'Ravijnrots', 'color' => '#9a5a3f', 'is_buildable' => true, 'sprite' => $this->canyonRockSprite()],
+            ['code' => 'scorched-ground', 'category' => 'ground', 'label' => 'Verschroeide grond', 'color' => '#2b2620', 'is_buildable' => true, 'sprite' => $this->scorchedGroundSprite()],
+
+            // Exterieur: extra objecten
+            ['code' => 'plane-wreck', 'category' => 'decoration', 'label' => 'Vliegtuigwrak', 'color' => '#6b7280', 'is_buildable' => false, 'sprite' => $this->planeWreckSprite(), 'footprint_width' => 2, 'footprint_height' => 2],
+            ['code' => 'antenna-array', 'category' => 'decoration', 'label' => 'Antennepark', 'color' => '#4b5563', 'is_buildable' => false, 'sprite' => $this->antennaArraySprite(), 'footprint_width' => 2, 'footprint_height' => 2],
+            ['code' => 'tent-camp', 'category' => 'decoration', 'label' => 'Legertent', 'color' => '#4a5d3a', 'is_buildable' => false, 'sprite' => $this->tentCampSprite(), 'render_scale' => 3.0],
+            ['code' => 'barrel-stack', 'category' => 'decoration', 'label' => 'Vatenstapel', 'color' => '#c9d94a', 'is_buildable' => false, 'sprite' => $this->barrelStackSprite(), 'render_scale' => 2.2],
         ];
 
         foreach ($tileTypes as $tileType) {
@@ -600,6 +647,19 @@ class TileTypeSeeder extends Seeder
             SVG);
     }
 
+    private function corridorPathSprite(): string
+    {
+        // Same base as concreteFloorSprite() — a painted walking lane on the
+        // lab floor, not a separate road material.
+        return $this->svg(<<<'SVG'
+            <rect width="32" height="32" fill="#71717a"/>
+            <rect x="0" y="0" width="32" height="2" fill="#a1a1aa"/>
+            <rect x="14" y="0" width="4" height="8" fill="#f2c94c"/>
+            <rect x="14" y="12" width="4" height="8" fill="#f2c94c"/>
+            <rect x="14" y="24" width="4" height="8" fill="#f2c94c"/>
+            SVG);
+    }
+
     private function concreteWallSprite(): string
     {
         return $this->svg(<<<'SVG'
@@ -682,9 +742,13 @@ class TileTypeSeeder extends Seeder
 
     private function helipadSprite(): string
     {
+        // Same tarmac base as tarmacSprite()/runwayStripeSprite() — this is
+        // "tarmac with an H-pad marking", not a separate ground material, so
+        // it has to tile flush next to plain tarmac.
         return $this->svg(<<<'SVG'
-            <rect width="32" height="32" fill="#3f3f45"/>
-            <rect x="0" y="0" width="32" height="3" fill="#4b4b52"/>
+            <rect width="32" height="32" fill="#4b4b52"/>
+            <rect x="0" y="0" width="32" height="3" fill="#5a5a62"/>
+            <rect x="0" y="29" width="32" height="3" fill="#38383e"/>
             <circle cx="16" cy="16" r="13" fill="none" stroke="#f2c94c" stroke-width="2"/>
             <rect x="10" y="9" width="3" height="14" fill="#f2c94c"/>
             <rect x="19" y="9" width="3" height="14" fill="#f2c94c"/>
@@ -707,12 +771,19 @@ class TileTypeSeeder extends Seeder
 
     private function irradiatedGroundSprite(): string
     {
+        // Same cracked-desert base as crackedGroundSprite() — this is that
+        // ground contaminated by alien energy, not a different biome, so it
+        // has to read as a continuation of the surrounding sand/cracked
+        // ground rather than a patch of alien swamp.
         return $this->svg(<<<'SVG'
-            <rect width="32" height="32" fill="#4a5a2f"/>
-            <rect x="0" y="24" width="32" height="8" fill="#3a4622"/>
-            <circle cx="16" cy="16" r="10" fill="#4ade80" opacity="0.18"/>
-            <path d="M4 10 L10 14 L8 22 L18 18 L26 26" stroke="#4ade80" stroke-width="1.4" fill="none" opacity="0.8"/>
-            <path d="M20 6 L16 14" stroke="#4ade80" stroke-width="1.2" fill="none" opacity="0.6"/>
+            <rect width="32" height="32" fill="#c2985c"/>
+            <rect x="0" y="24" width="32" height="8" fill="#a87d47"/>
+            <path d="M0 10 L8 12 L14 8 L20 14 L32 12" stroke="#8a6a3a" stroke-width="1" fill="none"/>
+            <path d="M6 12 L8 24" stroke="#8a6a3a" stroke-width="1" fill="none"/>
+            <path d="M20 14 L18 28" stroke="#8a6a3a" stroke-width="1" fill="none"/>
+            <circle cx="16" cy="16" r="10" fill="#4ade80" opacity="0.22"/>
+            <path d="M4 10 L10 14 L8 22 L18 18 L26 26" stroke="#4ade80" stroke-width="1.4" fill="none" opacity="0.85"/>
+            <path d="M20 6 L16 14" stroke="#4ade80" stroke-width="1.2" fill="none" opacity="0.65"/>
             <circle cx="10" cy="14" r="1.4" fill="#a7f3d0"/>
             <circle cx="18" cy="18" r="1.4" fill="#a7f3d0"/>
             SVG);
@@ -1054,6 +1125,450 @@ class TileTypeSeeder extends Seeder
             <circle cx="10" cy="12" r="2.6" fill="#111111"/>
             <circle cx="9.4" cy="11.4" r="0.8" fill="#60a5fa" opacity="0.8"/>
             <circle cx="18" cy="9.4" r="0.9" fill="#ef4444"/>
+            SVG);
+    }
+
+    // --- Interieur-vloeren -------------------------------------------------
+
+    private function labFloorTileSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <rect width="32" height="32" fill="#e5e7eb"/>
+            <rect x="0" y="0" width="32" height="2" fill="#f9fafb"/>
+            <rect x="0" y="15" width="32" height="1" fill="#cbd5e1"/>
+            <rect x="15" y="0" width="1" height="32" fill="#cbd5e1"/>
+            <rect x="4" y="4" width="3" height="3" fill="#d1d5db" opacity="0.6"/>
+            <rect x="24" y="20" width="3" height="3" fill="#d1d5db" opacity="0.6"/>
+            SVG);
+    }
+
+    private function labFloorGrateSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <rect width="32" height="32" fill="#374151"/>
+            <rect x="0" y="0" width="32" height="2" fill="#4b5563"/>
+            <rect x="2" y="4" width="28" height="2" fill="#1f2937"/>
+            <rect x="2" y="10" width="28" height="2" fill="#1f2937"/>
+            <rect x="2" y="16" width="28" height="2" fill="#1f2937"/>
+            <rect x="2" y="22" width="28" height="2" fill="#1f2937"/>
+            <rect x="2" y="28" width="28" height="2" fill="#1f2937"/>
+            <rect x="4" y="2" width="2" height="28" fill="#1f2937"/>
+            <rect x="12" y="2" width="2" height="28" fill="#1f2937"/>
+            <rect x="20" y="2" width="2" height="28" fill="#1f2937"/>
+            <rect x="28" y="2" width="2" height="28" fill="#1f2937"/>
+            SVG);
+    }
+
+    private function rubberFloorSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <rect width="32" height="32" fill="#27272a"/>
+            <rect x="0" y="0" width="32" height="2" fill="#3f3f46"/>
+            <circle cx="8" cy="8" r="1.4" fill="#3f3f46" opacity="0.6"/>
+            <circle cx="24" cy="8" r="1.4" fill="#3f3f46" opacity="0.6"/>
+            <circle cx="8" cy="24" r="1.4" fill="#3f3f46" opacity="0.6"/>
+            <circle cx="24" cy="24" r="1.4" fill="#3f3f46" opacity="0.6"/>
+            <circle cx="16" cy="16" r="1.4" fill="#3f3f46" opacity="0.6"/>
+            SVG);
+    }
+
+    // hazard-floor and blood-floor are both "concreteFloorSprite() with
+    // something painted/spilled on top" — same base+edge fill as
+    // concreteFloorSprite() below, so they tile flush next to a plain
+    // concrete floor instead of reading as an unrelated material.
+    private function hazardFloorSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <rect width="32" height="32" fill="#71717a"/>
+            <rect x="0" y="0" width="32" height="2" fill="#a1a1aa"/>
+            <rect x="0" y="6" width="32" height="6" fill="#f2c227"/>
+            <rect x="0" y="6" width="6" height="6" fill="#111111"/>
+            <rect x="12" y="6" width="6" height="6" fill="#111111"/>
+            <rect x="24" y="6" width="8" height="6" fill="#111111"/>
+            <rect x="0" y="20" width="32" height="6" fill="#f2c227"/>
+            <rect x="6" y="20" width="6" height="6" fill="#111111"/>
+            <rect x="18" y="20" width="6" height="6" fill="#111111"/>
+            SVG);
+    }
+
+    private function bloodFloorSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <rect width="32" height="32" fill="#71717a"/>
+            <rect x="0" y="0" width="32" height="2" fill="#a1a1aa"/>
+            <rect x="0" y="15" width="32" height="1" fill="#52525b" opacity="0.6"/>
+            <rect x="15" y="0" width="1" height="32" fill="#52525b" opacity="0.6"/>
+            <path d="M10 8c4 2 6 6 5 11-1 4-5 6-8 4-3-2-3-7-1-11 1-2 2-3 4-4z" fill="#7f1d1d" opacity="0.8"/>
+            <path d="M20 18c2 1 3 4 2 6-1 2-3 2-4 1-2-1-2-4-1-6 1-1 2-1 3-1z" fill="#7f1d1d" opacity="0.7"/>
+            <circle cx="9" cy="12" r="1.4" fill="#450a0a" opacity="0.8"/>
+            SVG);
+    }
+
+    private function concreteFloorSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <rect width="32" height="32" fill="#71717a"/>
+            <rect x="0" y="0" width="32" height="2" fill="#a1a1aa"/>
+            <rect x="0" y="15" width="32" height="1" fill="#52525b" opacity="0.6"/>
+            <rect x="15" y="0" width="1" height="32" fill="#52525b" opacity="0.6"/>
+            SVG);
+    }
+
+    // --- Interieur-wanden (previewicoon; volledige set komt uit RoadArt) --
+
+    private function labWallSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <rect x="2" y="8" width="28" height="20" fill="#e5e7eb"/>
+            <rect x="2" y="8" width="28" height="4" fill="#f9fafb"/>
+            <rect x="2" y="24" width="28" height="4" fill="#9ca3af"/>
+            <rect x="10" y="8" width="1" height="20" fill="#cbd5e1"/>
+            <rect x="21" y="8" width="1" height="20" fill="#cbd5e1"/>
+            SVG);
+    }
+
+    private function steelWallSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <rect x="2" y="8" width="28" height="20" fill="#6b7280"/>
+            <rect x="2" y="8" width="28" height="4" fill="#9ca3af"/>
+            <rect x="2" y="24" width="28" height="4" fill="#374151"/>
+            <rect x="10" y="8" width="1" height="20" fill="#4b5563"/>
+            <rect x="21" y="8" width="1" height="20" fill="#4b5563"/>
+            SVG);
+    }
+
+    private function glassWallSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <rect x="2" y="8" width="28" height="20" fill="#374151"/>
+            <rect x="4" y="10" width="24" height="16" fill="#7dd3fc" opacity="0.45"/>
+            <rect x="15" y="10" width="2" height="16" fill="#374151"/>
+            SVG);
+    }
+
+    // --- Interieur-deuren ---------------------------------------------------
+
+    private function doorSlidingSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <ellipse cx="16" cy="29" rx="10" ry="1.6" fill="#000000" opacity="0.25"/>
+            <rect x="4" y="6" width="24" height="23" fill="#374151"/>
+            <rect x="4" y="6" width="24" height="3" fill="#4b5563"/>
+            <rect x="5" y="10" width="10" height="17" fill="#6b7280"/>
+            <rect x="17" y="10" width="10" height="17" fill="#9ca3af"/>
+            <rect x="15" y="10" width="2" height="17" fill="#1f2937"/>
+            <circle cx="14" cy="18" r="1" fill="#1f2937"/>
+            <circle cx="18" cy="18" r="1" fill="#1f2937"/>
+            SVG);
+    }
+
+    private function doorBlastSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <ellipse cx="16" cy="29" rx="10" ry="1.8" fill="#000000" opacity="0.3"/>
+            <rect x="4" y="4" width="24" height="25" fill="#4b5563"/>
+            <rect x="4" y="4" width="24" height="4" fill="#6b7280"/>
+            <rect x="4" y="12" width="24" height="3" fill="#f2c227"/>
+            <rect x="4" y="12" width="4" height="3" fill="#111111"/>
+            <rect x="12" y="12" width="4" height="3" fill="#111111"/>
+            <rect x="20" y="12" width="4" height="3" fill="#111111"/>
+            <circle cx="16" cy="20" r="3" fill="#1f2937"/>
+            <circle cx="16" cy="20" r="1.4" fill="#6b7280"/>
+            <rect x="6" y="24" width="20" height="3" fill="#374151"/>
+            SVG);
+    }
+
+    private function doorCellSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <ellipse cx="16" cy="29" rx="10" ry="1.6" fill="#000000" opacity="0.25"/>
+            <rect x="5" y="6" width="22" height="23" fill="#27272a"/>
+            <rect x="8" y="9" width="2" height="20" fill="#71717a"/>
+            <rect x="13" y="9" width="2" height="20" fill="#71717a"/>
+            <rect x="18" y="9" width="2" height="20" fill="#71717a"/>
+            <rect x="23" y="9" width="2" height="20" fill="#71717a"/>
+            <rect x="5" y="9" width="22" height="2" fill="#71717a"/>
+            <rect x="5" y="26" width="22" height="2" fill="#71717a"/>
+            SVG);
+    }
+
+    private function doorKeycardSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <ellipse cx="16" cy="29" rx="10" ry="1.6" fill="#000000" opacity="0.25"/>
+            <rect x="4" y="6" width="24" height="23" fill="#9ca3af"/>
+            <rect x="4" y="6" width="24" height="3" fill="#d1d5db"/>
+            <rect x="6" y="11" width="20" height="16" fill="#6b7280"/>
+            <rect x="22" y="13" width="5" height="7" fill="#1f2937"/>
+            <circle cx="24.5" cy="15" r="0.8" fill="#ef4444"/>
+            <circle cx="24.5" cy="17.5" r="0.8" fill="#4ade80"/>
+            <rect x="8" y="17" width="2" height="6" fill="#374151"/>
+            SVG);
+    }
+
+    // --- Interieur-meubilair & props ----------------------------------------
+
+    private function labTableSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <ellipse cx="16" cy="27" rx="12" ry="2" fill="#000000" opacity="0.25"/>
+            <rect x="4" y="12" width="24" height="4" fill="#cbd5e1"/>
+            <rect x="4" y="12" width="24" height="1.5" fill="#f1f5f9"/>
+            <rect x="6" y="16" width="2" height="11" fill="#94a3b8"/>
+            <rect x="24" y="16" width="2" height="11" fill="#94a3b8"/>
+            <rect x="9" y="6" width="6" height="5" fill="#374151"/>
+            <circle cx="12" cy="8.5" r="1.6" fill="#4ade80" opacity="0.8"/>
+            SVG);
+    }
+
+    private function computerTerminalSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <ellipse cx="16" cy="27" rx="9" ry="1.8" fill="#000000" opacity="0.25"/>
+            <rect x="6" y="18" width="20" height="8" fill="#9ca3af"/>
+            <rect x="6" y="18" width="20" height="2" fill="#d1d5db"/>
+            <rect x="10" y="6" width="12" height="10" fill="#1f2937"/>
+            <rect x="11" y="7" width="10" height="7" fill="#38bdf8" opacity="0.5"/>
+            <rect x="14" y="16" width="4" height="3" fill="#374151"/>
+            <rect x="9" y="21" width="14" height="1.4" fill="#4b5563"/>
+            SVG);
+    }
+
+    private function specimenTankSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <ellipse cx="16" cy="27" rx="8" ry="1.8" fill="#000000" opacity="0.3"/>
+            <rect x="7" y="20" width="18" height="7" fill="#374151"/>
+            <rect x="9" y="6" width="14" height="18" rx="3" fill="#34d399" opacity="0.3"/>
+            <rect x="9" y="6" width="14" height="18" rx="3" fill="none" stroke="#6ee7b7" stroke-width="1"/>
+            <path d="M16 12c-1.6 0-2.4 1.6-2.4 3.2s0.8 4 2.4 4 2.4-2.4 2.4-4-0.8-3.2-2.4-3.2z" fill="#0f172a" opacity="0.7"/>
+            <circle cx="16" cy="10" r="1" fill="#a7f3d0"/>
+            SVG);
+    }
+
+    private function filingCabinetSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <ellipse cx="16" cy="29" rx="8" ry="1.6" fill="#000000" opacity="0.3"/>
+            <rect x="8" y="6" width="16" height="23" fill="#6b7280"/>
+            <rect x="8" y="6" width="16" height="3" fill="#9ca3af"/>
+            <rect x="9" y="11" width="14" height="6" fill="#4b5563"/>
+            <rect x="9" y="19" width="14" height="6" fill="#4b5563"/>
+            <rect x="15" y="13" width="2" height="2" fill="#1f2937"/>
+            <rect x="15" y="21" width="2" height="2" fill="#1f2937"/>
+            SVG);
+    }
+
+    private function stretcherSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <ellipse cx="16" cy="26" rx="12" ry="1.6" fill="#000000" opacity="0.25"/>
+            <rect x="4" y="14" width="24" height="8" rx="2" fill="#e5e7eb"/>
+            <rect x="4" y="14" width="24" height="2" fill="#f9fafb"/>
+            <rect x="4" y="20" width="2" height="6" fill="#6b7280"/>
+            <rect x="26" y="20" width="2" height="6" fill="#6b7280"/>
+            <rect x="4" y="20" width="24" height="1.4" fill="#9ca3af"/>
+            <rect x="9" y="16" width="14" height="3" fill="#93c5fd" opacity="0.4"/>
+            SVG);
+    }
+
+    private function ceilingLightSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <rect x="4" y="4" width="24" height="6" fill="#374151"/>
+            <rect x="6" y="10" width="20" height="4" fill="#fef3c7"/>
+            <rect x="6" y="10" width="20" height="4" fill="#fde68a" opacity="0.6"/>
+            <ellipse cx="16" cy="24" rx="14" ry="8" fill="#fde68a" opacity="0.12"/>
+            SVG);
+    }
+
+    private function alarmLightSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <ellipse cx="16" cy="29" rx="4" ry="1.2" fill="#000000" opacity="0.25"/>
+            <rect x="13" y="14" width="6" height="15" fill="#374151"/>
+            <path d="M11 8a5 5 0 0 1 10 0v6H11z" fill="#ef4444"/>
+            <path d="M11 8a5 5 0 0 1 10 0" fill="none" stroke="#fca5a5" stroke-width="1"/>
+            <circle cx="16" cy="8" r="8" fill="#ef4444" opacity="0.25"/>
+            SVG);
+    }
+
+    private function ventGrateSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <rect x="4" y="6" width="24" height="20" fill="#4b5563"/>
+            <rect x="4" y="6" width="24" height="3" fill="#6b7280"/>
+            <rect x="7" y="10" width="18" height="2" fill="#1f2937"/>
+            <rect x="7" y="14" width="18" height="2" fill="#1f2937"/>
+            <rect x="7" y="18" width="18" height="2" fill="#1f2937"/>
+            <rect x="7" y="22" width="18" height="2" fill="#1f2937"/>
+            SVG);
+    }
+
+    private function pipesSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <rect x="4" y="8" width="24" height="4" rx="2" fill="#6b7280"/>
+            <rect x="4" y="8" width="24" height="1.4" fill="#9ca3af"/>
+            <rect x="4" y="17" width="24" height="4" rx="2" fill="#8a6f2a" opacity="0.85"/>
+            <rect x="4" y="17" width="24" height="1.4" fill="#d1a94a"/>
+            <rect x="8" y="12" width="3" height="5" fill="#4b5563"/>
+            <rect x="20" y="12" width="3" height="5" fill="#4b5563"/>
+            SVG);
+    }
+
+    private function cellBarsSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <ellipse cx="16" cy="29" rx="11" ry="1.8" fill="#000000" opacity="0.25"/>
+            <rect x="4" y="24" width="24" height="3" fill="#3f3f46"/>
+            <rect x="4" y="4" width="24" height="3" fill="#3f3f46"/>
+            <rect x="6" y="4" width="2" height="23" fill="#71717a"/>
+            <rect x="12" y="4" width="2" height="23" fill="#71717a"/>
+            <rect x="18" y="4" width="2" height="23" fill="#71717a"/>
+            <rect x="24" y="4" width="2" height="23" fill="#71717a"/>
+            SVG);
+    }
+
+    private function whiteboardSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <rect x="4" y="6" width="24" height="18" fill="#f8fafc"/>
+            <rect x="4" y="6" width="24" height="18" fill="none" stroke="#94a3b8" stroke-width="1.4"/>
+            <path d="M8 12 L18 10 M8 16 L20 15 M8 20 L15 19" stroke="#334155" stroke-width="1" opacity="0.7"/>
+            <path d="M20 18 L24 12" stroke="#dc2626" stroke-width="1" opacity="0.6"/>
+            <rect x="4" y="24" width="24" height="2" fill="#94a3b8"/>
+            SVG);
+    }
+
+    private function officeChairSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <ellipse cx="16" cy="28" rx="7" ry="1.6" fill="#000000" opacity="0.28"/>
+            <rect x="12" y="10" width="8" height="10" rx="2" fill="#374151"/>
+            <rect x="13" y="20" width="6" height="3" fill="#1f2937"/>
+            <rect x="15" y="23" width="2" height="4" fill="#4b5563"/>
+            <path d="M10 27 L22 27 M11 25 L16 27 M21 25 L16 27" stroke="#4b5563" stroke-width="1.4"/>
+            SVG);
+    }
+
+    // --- Exterieur: extra grondtegels ---------------------------------------
+
+    private function parkingLinesSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <rect width="32" height="32" fill="#4b4b52"/>
+            <rect x="0" y="0" width="32" height="3" fill="#5a5a62"/>
+            <rect x="2" y="4" width="2" height="24" fill="#e5e7eb"/>
+            <rect x="28" y="4" width="2" height="24" fill="#e5e7eb"/>
+            SVG);
+    }
+
+    private function oilStainSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <rect width="32" height="32" fill="#4b4b52"/>
+            <path d="M16 8c5 2 8 7 6 12-2 5-8 6-12 4-4-2-6-7-4-12 1-2 2-3 4-4z" fill="#0f0f12" opacity="0.7"/>
+            <path d="M14 12c3 1 4 4 3 6-1 2-4 3-6 2-2-1-3-4-2-6 1-1 3-2 5-2z" fill="#1c1c22" opacity="0.5"/>
+            SVG);
+    }
+
+    private function saltFlatSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <rect width="32" height="32" fill="#e5e1d3"/>
+            <rect x="0" y="0" width="32" height="3" fill="#f2efe4"/>
+            <path d="M0 10 L10 12 L8 20 L18 18 L16 30" stroke="#c9c3ac" stroke-width="1" fill="none"/>
+            <path d="M20 4 L18 14 L28 16" stroke="#c9c3ac" stroke-width="1" fill="none"/>
+            SVG);
+    }
+
+    private function canyonRockSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <rect width="32" height="32" fill="#9a5a3f"/>
+            <rect x="0" y="0" width="32" height="4" fill="#b06f4f"/>
+            <rect x="0" y="24" width="32" height="8" fill="#7a4530"/>
+            <rect x="6" y="8" width="8" height="4" fill="#7a4530"/>
+            <rect x="20" y="14" width="6" height="4" fill="#b06f4f"/>
+            SVG);
+    }
+
+    private function scorchedGroundSprite(): string
+    {
+        // Same cracked-desert base as crackedGroundSprite(), with a charred
+        // patch burned into it — reads as "this spot of ground got
+        // scorched", not an unrelated black material next to the sand.
+        return $this->svg(<<<'SVG'
+            <rect width="32" height="32" fill="#c2985c"/>
+            <rect x="0" y="24" width="32" height="8" fill="#a87d47"/>
+            <path d="M0 10 L8 12 L14 8 L20 14 L32 12" stroke="#8a6a3a" stroke-width="1" fill="none"/>
+            <path d="M6 12 L8 24" stroke="#8a6a3a" stroke-width="1" fill="none"/>
+            <path d="M20 14 L18 28" stroke="#8a6a3a" stroke-width="1" fill="none"/>
+            <ellipse cx="16" cy="16" rx="13" ry="10" fill="#1a1713" opacity="0.75"/>
+            <path d="M4 8 L10 12 L6 18 L16 16 L22 24" stroke="#0f0d0a" stroke-width="1" fill="none" opacity="0.7"/>
+            <circle cx="20" cy="10" r="1.4" fill="#ea580c" opacity="0.5"/>
+            <circle cx="8" cy="20" r="1" fill="#ea580c" opacity="0.4"/>
+            SVG);
+    }
+
+    // --- Exterieur: extra objecten -------------------------------------------
+
+    private function planeWreckSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <ellipse cx="32" cy="54" rx="28" ry="5" fill="#000000" opacity="0.3"/>
+            <path d="M8 40 L48 34 L56 40 L48 46 L8 44Z" fill="#6b7280"/>
+            <path d="M8 40 L48 34 L56 40 L48 46 L8 44Z" fill="none" stroke="#374151" stroke-width="1.4"/>
+            <path d="M24 34 L30 14 L34 34Z" fill="#4b5563" opacity="0.8"/>
+            <path d="M28 46 L24 58 L32 50Z" fill="#4b5563" opacity="0.8"/>
+            <circle cx="14" cy="42" r="4" fill="#1f2937"/>
+            <path d="M10 42 L4 38 M10 44 L4 48" stroke="#1f2937" stroke-width="1.4"/>
+            <rect x="36" y="38" width="6" height="4" fill="#ea580c" opacity="0.7"/>
+            SVG, 64);
+    }
+
+    private function antennaArraySprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <ellipse cx="32" cy="58" rx="16" ry="3.6" fill="#000000" opacity="0.28"/>
+            <rect x="30" y="20" width="4" height="38" fill="#4b5563"/>
+            <path d="M18 30 L30 34 M46 30 L34 34" stroke="#6b7280" stroke-width="1.4"/>
+            <path d="M20 20 L30 26 M44 20 L34 26" stroke="#6b7280" stroke-width="1.4"/>
+            <rect x="16" y="18" width="4" height="4" fill="#374151"/>
+            <rect x="44" y="14" width="4" height="4" fill="#374151"/>
+            <circle cx="18" cy="16" r="1.6" fill="#ef4444"/>
+            <circle cx="46" cy="12" r="1.6" fill="#ef4444"/>
+            <circle cx="32" cy="18" r="1.6" fill="#ef4444"/>
+            SVG, 64);
+    }
+
+    private function tentCampSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <ellipse cx="16" cy="28" rx="12" ry="2" fill="#000000" opacity="0.25"/>
+            <path d="M16 5L29 26H3z" fill="#4a5d3a"/>
+            <path d="M16 5L23 26h-7z" fill="#39492c"/>
+            <path d="M16 5L9 26H3z" fill="#5a6f48"/>
+            <rect x="14" y="19" width="4" height="7" fill="#1f1a12"/>
+            <rect x="2" y="25" width="27" height="2" fill="#2f3a24"/>
+            SVG);
+    }
+
+    private function barrelStackSprite(): string
+    {
+        return $this->svg(<<<'SVG'
+            <ellipse cx="16" cy="29" rx="11" ry="2" fill="#000000" opacity="0.3"/>
+            <rect x="4" y="16" width="10" height="13" fill="#c9d94a"/>
+            <rect x="4" y="16" width="10" height="3" fill="#8a9a3a"/>
+            <circle cx="9" cy="22" r="2.6" fill="#181c0f"/>
+            <rect x="18" y="14" width="10" height="15" fill="#a8b83a"/>
+            <rect x="18" y="14" width="10" height="3" fill="#7a8a2a"/>
+            <circle cx="23" cy="21" r="2.6" fill="#181c0f"/>
+            <rect x="10" y="4" width="10" height="13" fill="#c9d94a"/>
+            <rect x="10" y="4" width="10" height="3" fill="#8a9a3a"/>
+            <circle cx="15" cy="10" r="2.4" fill="#181c0f"/>
             SVG);
     }
 }

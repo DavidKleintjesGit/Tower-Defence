@@ -5,6 +5,9 @@ use App\Http\Controllers\Admin\MapObjectController;
 use App\Http\Controllers\Admin\MapRouteController;
 use App\Http\Controllers\Admin\MapTilesController;
 use App\Livewire\Admin\Dashboard;
+use App\Livewire\Admin\Equipment\EditMonster;
+use App\Livewire\Admin\Equipment\EditWeapon;
+use App\Livewire\Admin\Equipment\Index as EquipmentIndex;
 use App\Livewire\Admin\Maps\Edit as MapsEdit;
 use App\Livewire\Admin\Maps\Index as MapsIndex;
 use App\Livewire\Admin\TileTypes\Index as TileTypesIndex;
@@ -14,6 +17,10 @@ Route::prefix('admin')->middleware(['auth', 'verified'])->group(function () {
     Route::get('/', Dashboard::class)->name('dashboard');
 
     Route::get('objects', TileTypesIndex::class)->name('admin.tile-types.index');
+
+    Route::get('uitrusting', EquipmentIndex::class)->name('admin.equipment.index');
+    Route::get('uitrusting/wapen/{towerType}', EditWeapon::class)->name('admin.equipment.weapon.edit');
+    Route::get('uitrusting/monster/{enemyType}', EditMonster::class)->name('admin.equipment.monster.edit');
 
     Route::get('maps', MapsIndex::class)->name('admin.maps.index');
     Route::get('maps/{map}', MapsEdit::class)->name('admin.maps.edit');

@@ -9,17 +9,21 @@ class TowerTypeSeeder extends Seeder
 {
     public function run(): void
     {
-        TowerType::whereNotIn('code', ['machine-gun', 'raketwerper', 'tesla-arcstation'])->delete();
+        TowerType::whereNotIn('code', ['machine-gun', 'raketwerper', 'tesla-arcstation', 'frost-cannon', 'laser'])->delete();
 
         $towerTypes = [
             [
                 'code' => 'machine-gun',
-                'name' => 'Mitrailleurnest',
-                'tagline' => 'Ratelt door tot de vijand valt.',
-                'description' => 'Omgebouwd bewakingswapen uit het oude Area 51-depot. Draait vrij rond en houdt elk doelwit binnen bereik onder vuur.',
+                'name' => 'Machine Gun Nest',
+                'tagline' => 'Rattles on until the enemy falls.',
+                'description' => 'Converted security weapon from the old Area 51 depot. Rotates freely and keeps any target within range under fire.',
                 'damage' => 6,
                 'range_tiles' => 2.6,
                 'fire_interval' => 0.18,
+                'splash_damage' => false,
+                'multi_target' => false,
+                'targets_ground' => true,
+                'targets_air' => true,
                 'cost' => 60,
                 'render_scale' => 1.05,
                 'color' => '#6b7178',
@@ -32,12 +36,16 @@ class TowerTypeSeeder extends Seeder
             ],
             [
                 'code' => 'raketwerper',
-                'name' => 'Raketwerper',
-                'tagline' => 'Eén knal. Geen vragen meer.',
-                'description' => 'Zwaar geschut uit het oude munitiedepot. Traag om te herladen, maar wat het raakt komt niet meer overeind.',
+                'name' => 'Rocket Launcher',
+                'tagline' => 'One bang. No more questions.',
+                'description' => 'Heavy ordnance from the old munitions depot. Slow to reload, but whatever it hits doesn\'t get back up.',
                 'damage' => 45,
-                'range_tiles' => 2.4,
+                'range_tiles' => 4.8,
                 'fire_interval' => 1.8,
+                'splash_damage' => true,
+                'multi_target' => false,
+                'targets_ground' => true,
+                'targets_air' => true,
                 'cost' => 140,
                 'render_scale' => 1.4,
                 'color' => '#4d4d30',
@@ -50,12 +58,16 @@ class TowerTypeSeeder extends Seeder
             ],
             [
                 'code' => 'tesla-arcstation',
-                'name' => 'Tesla-arcstation',
-                'tagline' => 'Kort lontje. Razendsnel getemperd.',
-                'description' => 'Experimentele stroomtoren uit Lab 2. Kort bereik, maar een vuurritme dat de lucht laat knetteren.',
+                'name' => 'Tesla Arc Station',
+                'tagline' => 'Quick to spark. Quicker to strike again.',
+                'description' => 'Experimental power tower from Lab 2. Short range, but a fire rate that makes the air crackle.',
                 'damage' => 5,
                 'range_tiles' => 1.7,
                 'fire_interval' => 0.12,
+                'splash_damage' => false,
+                'multi_target' => true,
+                'targets_ground' => true,
+                'targets_air' => true,
                 'cost' => 90,
                 'render_scale' => 1,
                 'color' => '#7c3aed',
@@ -65,6 +77,50 @@ class TowerTypeSeeder extends Seeder
                 'muzzle_flash_sprite' => $this->svg($this->teslaMuzzleFlashInner()),
                 'projectile_sprite' => $this->teslaProjectileSprite(),
                 'projectile_style' => 'bolt',
+            ],
+            [
+                'code' => 'frost-cannon',
+                'name' => 'Frost Cannon',
+                'tagline' => 'Cold enough to argue with.',
+                'description' => 'Cryogenic containment cannon repurposed from Lab 4. Every shot leaves the air brittle and white.',
+                'damage' => 16,
+                'range_tiles' => 2.8,
+                'fire_interval' => 0.9,
+                'splash_damage' => false,
+                'multi_target' => false,
+                'targets_ground' => true,
+                'targets_air' => true,
+                'cost' => 100,
+                'render_scale' => 1.05,
+                'color' => '#0e7490',
+                'sprite' => $this->svg($this->frostBaseInner().$this->frostHeadInner()),
+                'base_sprite' => $this->svg($this->frostBaseInner()),
+                'head_sprite' => $this->svg($this->frostHeadInner()),
+                'muzzle_flash_sprite' => $this->svg($this->frostMuzzleFlashInner()),
+                'projectile_sprite' => $this->frostProjectileSprite(),
+                'projectile_style' => 'sprite',
+            ],
+            [
+                'code' => 'laser',
+                'name' => 'Laser Emitter',
+                'tagline' => 'Never stops. Never has to.',
+                'description' => 'Continuous-beam optics from the Lab 2 annex. Locks on and simply keeps cutting for as long as anything stays in range.',
+                'damage' => 14,
+                'range_tiles' => 2.2,
+                'fire_interval' => 0.1,
+                'splash_damage' => false,
+                'multi_target' => false,
+                'targets_ground' => true,
+                'targets_air' => true,
+                'cost' => 110,
+                'render_scale' => 1,
+                'color' => '#22d3ee',
+                'sprite' => $this->svg($this->laserBaseInner().$this->laserHeadInner()),
+                'base_sprite' => $this->svg($this->laserBaseInner()),
+                'head_sprite' => $this->svg($this->laserHeadInner()),
+                'muzzle_flash_sprite' => $this->svg($this->laserGlowInner()),
+                'projectile_sprite' => $this->laserProjectileSprite(),
+                'projectile_style' => 'beam',
             ],
         ];
 
@@ -267,6 +323,117 @@ class TowerTypeSeeder extends Seeder
         return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges">'
             .'<path d="M9 1 L4 9 L7 9 L5 15 L12 6 L8 6 Z" fill="#c4b5fd"/>'
             .'<path d="M9 1 L4 9 L7 9 L5 15 L12 6 L8 6 Z" fill="none" stroke="#f5f3ff" stroke-width="0.6"/>'
+            .'</svg>';
+    }
+
+    /**
+     * Static base — same iso-box + squashed-dome trick, re-tinted icy blue,
+     * with a pair of icicle spikes jutting off the front rim for flavor.
+     */
+    private function frostBaseInner(): string
+    {
+        return <<<'SVG'
+            <ellipse cx="16" cy="27" rx="10" ry="3" fill="#000000" opacity="0.25"/>
+            <polygon points="9,20 23,20 21.5,25 10.5,25" fill="#0c4a6e"/>
+            <polygon points="9,20 23,20 22,21 10,21" fill="#155e75"/>
+            <ellipse cx="16" cy="19.3" rx="7.2" ry="3.1" fill="#0e7490"/>
+            <polygon points="9.5,20 11,17 11.8,20" fill="#cffafe" opacity="0.85"/>
+            <polygon points="21,20 22.2,17.4 22.8,20" fill="#cffafe" opacity="0.85"/>
+            <ellipse cx="16" cy="20" rx="6.3" ry="3.5" fill="#0891b2"/>
+            <ellipse cx="16" cy="20" rx="4.5" ry="2.5" fill="#22d3ee"/>
+            <ellipse cx="16" cy="20" rx="2.2" ry="1.2" fill="#e0f2fe" opacity="0.8"/>
+            SVG;
+    }
+
+    /**
+     * Rotating barrel, canonical east-pointing around pivot (16, 20), with a
+     * cluster of ice-crystal shards permanently frozen onto the muzzle.
+     */
+    private function frostHeadInner(): string
+    {
+        return <<<'SVG'
+            <rect x="16" y="18.3" width="10" height="3.4" fill="#0c4a6e"/>
+            <rect x="16" y="18.3" width="10" height="1" fill="#22d3ee"/>
+            <polygon points="25,18 27.5,19.2 25.5,19.6" fill="#e0f2fe" opacity="0.9"/>
+            <polygon points="25,22 27.2,20.8 25.5,20.4" fill="#e0f2fe" opacity="0.9"/>
+            <polygon points="26,19 28.5,20 26,21" fill="#bae6fd" opacity="0.8"/>
+            SVG;
+    }
+
+    private function frostMuzzleFlashInner(): string
+    {
+        return <<<'SVG'
+            <circle cx="28" cy="20" r="2.8" fill="#e0f2fe" opacity="0.9"/>
+            <circle cx="28" cy="20" r="1.3" fill="#ffffff"/>
+            <path d="M28 16.5v2.2M28 21.3v2.2M24.5 20h2.2M29.3 20h2.2" stroke="#cffafe" stroke-width="0.6" opacity="0.8"/>
+            SVG;
+    }
+
+    private function frostProjectileSprite(): string
+    {
+        return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 8" shape-rendering="crispEdges">'
+            .'<polygon points="0,3.2 10,3.2 14,4 10,4.8 0,4.8" fill="#67e8f9" opacity="0.7"/>'
+            .'<polygon points="4,3.6 12,3.6 15,4 12,4.4 4,4.4" fill="#e0f2fe"/>'
+            .'</svg>';
+    }
+
+    /**
+     * Static base — dark charcoal housing with a glowing cyan energy core,
+     * sleeker than the other mounts to read as precision optics rather than
+     * a gun.
+     */
+    private function laserBaseInner(): string
+    {
+        return <<<'SVG'
+            <ellipse cx="16" cy="27" rx="9" ry="2.6" fill="#000000" opacity="0.25"/>
+            <polygon points="10,20 22,20 21,25 11,25" fill="#0f172a"/>
+            <polygon points="10,20 22,20 21.2,20.9 10.8,20.9" fill="#1e293b"/>
+            <ellipse cx="16" cy="19.3" rx="6.6" ry="2.9" fill="#334155"/>
+            <ellipse cx="16" cy="20" rx="5.6" ry="3.1" fill="#0e7490"/>
+            <ellipse cx="16" cy="20" rx="3.6" ry="2" fill="#22d3ee"/>
+            <ellipse cx="16" cy="20" rx="1.6" ry="0.9" fill="#a5f3fc" opacity="0.8"/>
+            SVG;
+    }
+
+    /**
+     * Rotating emitter, canonical east-pointing around pivot (16, 20) — a
+     * slim housing ending in a lens, in contrast to the other towers' gun
+     * barrels.
+     */
+    private function laserHeadInner(): string
+    {
+        return <<<'SVG'
+            <rect x="16" y="19" width="9" height="2" fill="#1e293b"/>
+            <rect x="16" y="19.3" width="9" height="0.5" fill="#22d3ee" opacity="0.9"/>
+            <circle cx="26" cy="20" r="1.8" fill="#083344"/>
+            <circle cx="26" cy="20" r="1" fill="#67e8f9"/>
+            SVG;
+    }
+
+    /**
+     * Emitter glow — the game keeps this drawn for as long as the beam is
+     * actively firing (see projectile_style 'beam' handling in
+     * game/index.js), not just a brief flash, since there's no discrete
+     * shot moment to flash for.
+     */
+    private function laserGlowInner(): string
+    {
+        return <<<'SVG'
+            <circle cx="26" cy="20" r="3" fill="#a5f3fc" opacity="0.85"/>
+            <circle cx="26" cy="20" r="1.4" fill="#ffffff"/>
+            SVG;
+    }
+
+    /**
+     * Fallback icon only (Armory card, drag preview) — the actual weapon
+     * effect is a continuous line drawn straight in JS, not a travelling
+     * projectile, so this sprite is never spawned in play.
+     */
+    private function laserProjectileSprite(): string
+    {
+        return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 8" shape-rendering="crispEdges">'
+            .'<rect x="0" y="3.4" width="16" height="1.2" fill="#22d3ee"/>'
+            .'<rect x="0" y="3.7" width="16" height="0.6" fill="#f0fdfa"/>'
             .'</svg>';
     }
 }

@@ -23,6 +23,9 @@
         @case('flask')
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 2v6L3.5 18a2 2 0 001.7 3h13.6a2 2 0 001.7-3L15 8V2"/><path d="M8 2h8"/><path d="M6.5 15h11"/></svg>
             @break
+        @case('route')
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 20c2-4 2-8 8-8s6-4 8-8"/><circle cx="4" cy="20" r="1.6" fill="currentColor" stroke="none"/><circle cx="20" cy="4" r="1.6" fill="currentColor" stroke="none"/></svg>
+            @break
         @default
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/></svg>
     @endswitch

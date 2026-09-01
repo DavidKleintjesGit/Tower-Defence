@@ -3,7 +3,7 @@
         <div class="flex items-center justify-between px-6 py-6">
             <div>
                 <h2 class="text-xl font-semibold text-gray-900">Maps</h2>
-                <p class="mt-1 text-sm text-gray-500">Beheer de speelbare maps voor Area 51 Tower Defense.</p>
+                <p class="mt-1 text-sm text-gray-500">Manage the playable maps for Area 51 Tower Defense.</p>
             </div>
 
             <button
@@ -11,7 +11,7 @@
                 wire:click="createBlank"
                 class="inline-flex items-center gap-2 rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700"
             >
-                <span class="text-lg leading-none">+</span> Nieuwe map
+                <span class="text-lg leading-none">+</span> New map
             </button>
         </div>
     </header>
@@ -19,8 +19,8 @@
     <div class="px-6 py-6">
         @if ($maps->isEmpty())
             <div class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 bg-white py-16 text-center">
-                <p class="text-sm font-medium text-gray-900">Nog geen maps</p>
-                <p class="mt-1 text-sm text-gray-500">Klik op "Nieuwe map" om direct te beginnen in de mapbuilder.</p>
+                <p class="text-sm font-medium text-gray-900">No maps yet</p>
+                <p class="mt-1 text-sm text-gray-500">Click "New map" to jump straight into the map builder.</p>
             </div>
         @else
             <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -38,16 +38,16 @@
                         <button
                             type="button"
                             wire:click="delete({{ $map->id }})"
-                            wire:confirm="Deze map verwijderen?"
+                            wire:confirm="Delete this map?"
                             class="absolute right-2 top-2 z-10 hidden h-7 w-7 items-center justify-center rounded-full bg-white text-gray-400 shadow-sm hover:text-red-600 group-hover:flex"
-                            aria-label="Map verwijderen"
+                            aria-label="Delete map"
                         >
                             &times;
                         </button>
 
                         <a href="{{ route('admin.maps.edit', $map) }}" wire:navigate class="block">
                             <div class="flex h-28 items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 text-xs font-medium text-gray-400">
-                                {{ $map->width }} &times; {{ $map->height }} tegels
+                                {{ $map->width }} &times; {{ $map->height }} tiles
                             </div>
 
                             <div class="p-4">

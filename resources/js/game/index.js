@@ -1,3 +1,5 @@
+import { audio } from './audio.js';
+
 function initGame() {
     const canvas = document.getElementById('game-canvas');
     const viewport = document.getElementById('game-viewport');
@@ -8,9 +10,35 @@ function initGame() {
 
     canvas.dataset.initialized = 'true';
 
+    // Browsers block audio until a user gesture; the very first pointer
+    // interaction with the game (panning, clicking a weapon, etc.) is enough
+    // to unlock the AudioContext, after which music starts if enabled.
+    document.addEventListener('pointerdown', () => audio.startMusic(), { once: true });
+
     const dataScript = document.getElementById('map-data');
     const map = JSON.parse(dataScript.textContent);
     const SANDBOX = Boolean(map.sandbox);
+
+    // Campaign maps carry their level number in mapData (see Play.php); a
+    // plain fetch to the completion endpoint unlocks the next node on the
+    // campaign path screen. Sandbox play and non-campaign maps skip this.
+    function reportCampaignCompletion() {
+        if (SANDBOX || !map.campaign_level_order) {
+            return;
+        }
+
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+        fetch(`/campaign/${map.campaign_level_order}/complete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+            },
+        }).catch(() => {});
+    }
+
     const tileColors = map.tile_colors ?? {};
     const tileSprites = map.tile_sprites ?? {};
     const tileScales = map.tile_scales ?? {};
@@ -556,17 +584,25 @@ function initGame() {
     const WAVES = [
         { count: 5, spawnInterval: 0.8, types: regularEnemyCodes.slice(0, 1) },
         { count: 8, spawnInterval: 0.7, types: regularEnemyCodes.slice(0, 2) },
-        { count: 12, spawnInterval: 0.6, types: regularEnemyCodes.concat(bossEnemyCodes) },
+        { count: 10, spawnInterval: 0.65, types: regularEnemyCodes },
+        { count: 13, spawnInterval: 0.55, types: regularEnemyCodes },
+        { count: 16, spawnInterval: 0.5, types: regularEnemyCodes },
+        { count: 20, spawnInterval: 0.4, types: regularEnemyCodes.concat(bossEnemyCodes) },
     ];
 
     const speed = map.tile_size * 1.5; // pixels per second
     let enemies = [];
     let towers = [];
     let projectiles = [];
+    let explosions = [];
     let lives = 10;
     let gold = Number(map.starting_gold) || 150;
     let gameOver = false;
     let victory = false;
+    let gameSpeed = 1;
+    let isPaused = false;
+    let enemiesKilled = 0;
+    let goldEarned = 0;
 
     let currentWaveIndex = -1;
     let waveActive = false;
@@ -577,8 +613,29 @@ function initGame() {
     const goldEl = document.getElementById('game-gold');
     const waveInfoEl = document.getElementById('game-wave-info');
     const waveButton = document.getElementById('game-wave-btn');
+    const speedButton = document.getElementById('game-speed-btn');
+    const pauseButton = document.getElementById('game-pause-btn');
+    const wavePreviewEl = document.getElementById('game-wave-preview');
     const overlay = document.getElementById('game-over-overlay');
     const victoryOverlay = document.getElementById('game-victory-overlay');
+    const gameOverStatsEl = document.getElementById('game-over-stats');
+    const victoryStatsEl = document.getElementById('game-victory-stats');
+
+    speedButton?.addEventListener('click', () => {
+        gameSpeed = gameSpeed === 1 ? 2 : 1;
+        speedButton.textContent = `${gameSpeed}x`;
+        speedButton.classList.toggle('border-emerald-400', gameSpeed === 2);
+        speedButton.classList.toggle('bg-emerald-500/20', gameSpeed === 2);
+        speedButton.classList.toggle('text-emerald-200', gameSpeed === 2);
+    });
+
+    pauseButton?.addEventListener('click', () => {
+        isPaused = !isPaused;
+        pauseButton.textContent = isPaused ? 'Resume' : 'Pause';
+        pauseButton.classList.toggle('border-emerald-400', isPaused);
+        pauseButton.classList.toggle('bg-emerald-500/20', isPaused);
+        pauseButton.classList.toggle('text-emerald-200', isPaused);
+    });
 
     function updateGoldDisplay() {
         if (goldEl) {
@@ -596,6 +653,7 @@ function initGame() {
     }
 
     updateGoldDisplay();
+    updateWavePreview();
 
     function updateWaveInfo() {
         if (!waveInfoEl) {
@@ -604,6 +662,34 @@ function initGame() {
 
         const waveNumber = Math.max(currentWaveIndex + 1, 1);
         waveInfoEl.textContent = `${waveNumber} / ${WAVES.length}`;
+    }
+
+    // Shows which enemy types (and how many total) can appear in the next
+    // wave, so players can plan their defense before committing — hidden
+    // once a wave is actually in progress since it's no longer "upcoming".
+    function updateWavePreview() {
+        if (!wavePreviewEl) {
+            return;
+        }
+
+        const wave = WAVES[currentWaveIndex + 1];
+
+        if (!wave || waveActive || gameOver || victory) {
+            wavePreviewEl.innerHTML = '';
+            wavePreviewEl.classList.add('hidden');
+            wavePreviewEl.classList.remove('flex');
+            return;
+        }
+
+        const uniqueTypes = [...new Set(wave.types)];
+        const icons = uniqueTypes.map((code) => {
+            const type = enemyTypes[code];
+            return `<img src="${type?.sprite ?? ''}" alt="${type?.name ?? ''}" title="${type?.name ?? ''}" class="h-6 w-6" style="image-rendering: pixelated">`;
+        }).join('');
+
+        wavePreviewEl.innerHTML = `<span class="text-[10px] uppercase tracking-widest text-slate-500">Next:</span>${icons}<span class="text-xs font-bold text-slate-300">&times;${wave.count}</span>`;
+        wavePreviewEl.classList.remove('hidden');
+        wavePreviewEl.classList.add('flex');
     }
 
     function startWave() {
@@ -622,8 +708,10 @@ function initGame() {
         spawnQueueRemaining = wave.count;
         spawnTimer = 0;
         updateWaveInfo();
+        updateWavePreview();
         waveButton.disabled = true;
-        waveButton.textContent = `Wave ${currentWaveIndex + 1} bezig...`;
+        waveButton.textContent = `Wave ${currentWaveIndex + 1} in progress...`;
+        audio.playWaveStart();
     }
 
     function updateWaveSpawning(deltaSeconds) {
@@ -650,19 +738,39 @@ function initGame() {
 
             if (currentWaveIndex >= WAVES.length - 1) {
                 victory = true;
+
+                if (victoryStatsEl) {
+                    victoryStatsEl.textContent = `Waves survived: ${currentWaveIndex + 1} / ${WAVES.length} · Enemies defeated: ${enemiesKilled} · Gold earned: $${goldEarned}`;
+                }
+
                 victoryOverlay.classList.remove('hidden');
                 victoryOverlay.classList.add('flex');
                 waveButton.classList.add('hidden');
+                audio.playVictory();
+                reportCampaignCompletion();
                 return;
             }
 
             waveButton.disabled = false;
             waveButton.textContent = `Start wave ${currentWaveIndex + 2}`;
+            updateWavePreview();
         }
     }
 
     function spawnEnemy(typeCode) {
-        if (gameOver || waypoints.length < 2) {
+        if (waypoints.length < 2) {
+            return;
+        }
+
+        spawnEnemyAt(typeCode, waypoints[0].x, waypoints[0].y, 1);
+    }
+
+    // Used both for normal wave spawns (at the map's entrance) and for
+    // spawner enemies (e.g. the Mothership Drone) that create new enemies
+    // at their own current position/path progress instead of back at the
+    // start.
+    function spawnEnemyAt(typeCode, x, y, targetIndex) {
+        if (gameOver) {
             return;
         }
 
@@ -673,14 +781,15 @@ function initGame() {
         }
 
         enemies.push({
-            x: waypoints[0].x,
-            y: waypoints[0].y,
-            targetIndex: 1,
+            x,
+            y,
+            targetIndex,
             hp: type.hp,
             maxHp: type.hp,
             speedMultiplier: type.speed_multiplier,
             typeCode: type.code,
             animTimer: 0,
+            spawnTimer: 0,
         });
     }
 
@@ -752,6 +861,8 @@ function initGame() {
     const towerUpgradeLabel = document.getElementById('tower-upgrade-label');
     const towerUpgradeBtn = document.getElementById('tower-upgrade-btn');
     const towerUpgradeCost = document.getElementById('tower-upgrade-cost');
+    const towerSellBtn = document.getElementById('tower-sell-btn');
+    const towerSellAmount = document.getElementById('tower-sell-amount');
 
     function showTowerDetail(type, tower) {
         if (!towerDetailSidebar) {
@@ -759,7 +870,7 @@ function initGame() {
         }
 
         if (towerDetailName) {
-            towerDetailName.textContent = `${type.name} — Niv. ${tower.level}`;
+            towerDetailName.textContent = `${type.name} — Lvl ${tower.level}`;
         }
 
         if (towerDetailImage) {
@@ -771,7 +882,7 @@ function initGame() {
         }
 
         if (towerDetailRange) {
-            towerDetailRange.textContent = `${(tower.range / map.tile_size).toFixed(1)} tegels`;
+            towerDetailRange.textContent = `${(tower.range / map.tile_size).toFixed(1)} tiles`;
         }
 
         if (towerDetailRate) {
@@ -787,14 +898,20 @@ function initGame() {
 
         if (towerUpgradeLabel && towerUpgradeBtn && towerUpgradeCost) {
             if (nextTier) {
-                towerUpgradeLabel.textContent = `Upgrade naar niveau ${nextTier.level}`;
-                towerUpgradeCost.textContent = SANDBOX ? 'Gratis' : `$ ${nextTier.upgrade_cost}`;
+                towerUpgradeLabel.textContent = `Upgrade to level ${nextTier.level}`;
+                towerUpgradeCost.textContent = SANDBOX ? 'Free' : `$ ${nextTier.upgrade_cost}`;
                 towerUpgradeBtn.classList.remove('hidden');
                 towerUpgradeBtn.disabled = false;
             } else {
-                towerUpgradeLabel.textContent = 'Maximaal niveau bereikt';
+                towerUpgradeLabel.textContent = 'Max level reached';
                 towerUpgradeBtn.classList.add('hidden');
             }
+        }
+
+        if (towerSellAmount) {
+            towerSellAmount.textContent = SANDBOX
+                ? 'Free'
+                : `$ ${Math.round((tower.totalInvested ?? 0) * SELL_REFUND_RATE)}`;
         }
 
         towerDetailSidebar.classList.remove('hidden');
@@ -828,6 +945,7 @@ function initGame() {
             }
 
             gold -= nextTier.upgrade_cost;
+            selectedTower.totalInvested = (selectedTower.totalInvested ?? 0) + nextTier.upgrade_cost;
             updateGoldDisplay();
         }
 
@@ -836,8 +954,11 @@ function initGame() {
         selectedTower.range = nextTier.range_tiles * map.tile_size;
         selectedTower.fireInterval = nextTier.fire_interval;
 
+        audio.playUpgrade();
         showTowerDetail(type, selectedTower);
     });
+
+    towerSellBtn?.addEventListener('click', sellTower);
 
     function selectTower(tower) {
         const type = towerTypes[tower.typeCode];
@@ -863,9 +984,9 @@ function initGame() {
         // tower-detail sidebar and the enemy popup can be open at once.
         selectedEnemy = enemy;
         setInfoPopup(type.name, [
-            { label: 'Levenspunten', value: `${Math.max(0, Math.round(enemy.hp))} / ${enemy.maxHp}` },
-            { label: 'Snelheid', value: `${(enemy.speedMultiplier ?? 1).toFixed(2)}x` },
-            { label: 'Beloning', value: `$ ${type.bounty ?? 0}` },
+            { label: 'Health', value: `${Math.max(0, Math.round(enemy.hp))} / ${enemy.maxHp}` },
+            { label: 'Speed', value: `${(enemy.speedMultiplier ?? 1).toFixed(2)}x` },
+            { label: 'Bounty', value: `$ ${type.bounty ?? 0}` },
         ], type.sprite);
     }
 
@@ -921,7 +1042,41 @@ function initGame() {
             idleSweep: Math.random() * Math.PI * 2,
             fireTtl: 0,
             level: 1,
+            beamActive: false,
+            totalInvested: type.cost,
         });
+
+        audio.playPlaceTower();
+    }
+
+    const SELL_REFUND_RATE = 0.6;
+
+    function sellTower() {
+        if (!selectedTower) {
+            return;
+        }
+
+        const index = towers.indexOf(selectedTower);
+
+        if (index === -1) {
+            return;
+        }
+
+        const spot = buildSpots.find((s) => s.x === selectedTower.x && s.y === selectedTower.y);
+
+        if (spot) {
+            spot.hasTower = false;
+        }
+
+        if (!SANDBOX) {
+            const refund = Math.round((selectedTower.totalInvested ?? 0) * SELL_REFUND_RATE);
+            gold += refund;
+            updateGoldDisplay();
+        }
+
+        towers.splice(index, 1);
+        audio.playSell();
+        deselectTower();
     }
 
     // Weapon placement is click-to-arm, click-to-place (no dragging): pick a
@@ -1050,20 +1205,53 @@ function initGame() {
 
         if (lives === 0 && !gameOver) {
             gameOver = true;
+
+            if (gameOverStatsEl) {
+                gameOverStatsEl.textContent = `Waves survived: ${Math.max(currentWaveIndex, 0)} / ${WAVES.length} · Enemies defeated: ${enemiesKilled} · Gold earned: $${goldEarned}`;
+            }
+
             overlay?.classList.remove('hidden');
             overlay?.classList.add('flex');
+            audio.playGameOver();
         }
     }
 
     function updateEnemies(deltaSeconds) {
+        // Enemies spawned by a spawner (e.g. the Mothership Drone) are
+        // collected here and pushed only after the filter below finishes —
+        // pushing straight into `enemies` mid-filter would silently lose
+        // the new entry once `enemies = enemies.filter(...)` reassigns the
+        // variable to a fresh array.
+        const pendingSpawns = [];
+
         enemies = enemies.filter((enemy) => {
             if (enemy.hp <= 0) {
-                gold += enemyTypes[enemy.typeCode]?.bounty ?? 0;
+                const bounty = enemyTypes[enemy.typeCode]?.bounty ?? 0;
+                gold += bounty;
+                goldEarned += bounty;
+                enemiesKilled += 1;
                 updateGoldDisplay();
+                audio.playCoin();
                 return false;
             }
 
             enemy.animTimer = (enemy.animTimer ?? 0) + deltaSeconds * (enemy.speedMultiplier ?? 1);
+
+            const type = enemyTypes[enemy.typeCode];
+
+            if (type?.spawns_code && type.spawn_interval > 0) {
+                enemy.spawnTimer = (enemy.spawnTimer ?? 0) + deltaSeconds;
+
+                if (enemy.spawnTimer >= type.spawn_interval) {
+                    enemy.spawnTimer -= type.spawn_interval;
+                    pendingSpawns.push({
+                        typeCode: type.spawns_code,
+                        x: enemy.x,
+                        y: enemy.y,
+                        targetIndex: enemy.targetIndex,
+                    });
+                }
+            }
 
             const target = waypoints[enemy.targetIndex];
             const dx = target.x - enemy.x;
@@ -1087,6 +1275,8 @@ function initGame() {
 
             return true;
         });
+
+        pendingSpawns.forEach((spawn) => spawnEnemyAt(spawn.typeCode, spawn.x, spawn.y, spawn.targetIndex));
     }
 
     function towerHeadPivot(tower, size) {
@@ -1098,8 +1288,8 @@ function initGame() {
         };
     }
 
-    function spawnProjectile(tower, target) {
-        const size = towerRenderSize(towerTypes[tower.typeCode]);
+    function towerMuzzleTip(tower, type) {
+        const size = towerRenderSize(type);
         const scale = size / 32;
         const pivot = towerHeadPivot(tower, size);
         const relX = 27 - 32 * TOWER_PIVOT_FRACTION.x;
@@ -1108,39 +1298,78 @@ function initGame() {
         const sin = Math.sin(tower.angle);
         const rotatedX = relX * cos - relY * sin;
         const rotatedY = relX * sin + relY * cos;
-        const tipX = pivot.x + rotatedX * scale;
-        const tipY = pivot.y + rotatedY * TOWER_HEAD_SQUASH * scale;
+
+        return {
+            x: pivot.x + rotatedX * scale,
+            y: pivot.y + rotatedY * TOWER_HEAD_SQUASH * scale,
+        };
+    }
+
+    function spawnProjectile(tower, target) {
+        const type = towerTypes[tower.typeCode];
+        const tip = towerMuzzleTip(tower, type);
 
         projectiles.push({
-            x: tipX,
-            y: tipY,
-            startX: tipX,
-            startY: tipY,
+            x: tip.x,
+            y: tip.y,
+            startX: tip.x,
+            startY: tip.y,
             targetX: target.x,
             targetY: target.y,
             t: 0,
             duration: 0.14,
             typeCode: tower.typeCode,
+            explodesOnArrival: Boolean(type?.splash_damage),
         });
+    }
+
+    const EXPLOSION_DURATION = 0.4;
+
+    function spawnExplosion(x, y, radius) {
+        explosions.push({ x, y, radius, t: 0, duration: EXPLOSION_DURATION });
+        audio.playExplosion();
+    }
+
+    // An enemy can be targeted by a tower only if the tower's targeting
+    // flags (set in the admin equipment editor) include the enemy's domain
+    // (ground/air) — a tower with targets_air disabled simply can't see
+    // flying enemies at all, regardless of range.
+    function towerCanTarget(type, enemy) {
+        const domain = enemyTypes[enemy.typeCode]?.domain ?? 'ground';
+        return domain === 'air' ? Boolean(type?.targets_air) : Boolean(type?.targets_ground);
     }
 
     function updateTowers(deltaSeconds) {
         towers.forEach((tower) => {
-            tower.cooldown -= deltaSeconds;
+            const type = towerTypes[tower.typeCode];
+            const isBeam = type?.projectile_style === 'beam';
 
-            if (tower.fireTtl > 0) {
-                tower.fireTtl -= deltaSeconds;
+            if (!isBeam) {
+                tower.cooldown -= deltaSeconds;
+
+                if (tower.fireTtl > 0) {
+                    tower.fireTtl -= deltaSeconds;
+                }
             }
 
             let target = null;
             let closestDistance = Infinity;
+            const enemiesInRange = [];
 
             enemies.forEach((enemy) => {
+                if (!towerCanTarget(type, enemy)) {
+                    return;
+                }
+
                 const distance = Math.hypot(enemy.x - tower.x, enemy.y - tower.y);
 
-                if (distance <= tower.range && distance < closestDistance) {
-                    closestDistance = distance;
-                    target = enemy;
+                if (distance <= tower.range) {
+                    enemiesInRange.push({ enemy, distance });
+
+                    if (distance < closestDistance) {
+                        closestDistance = distance;
+                        target = enemy;
+                    }
                 }
             });
 
@@ -1153,11 +1382,55 @@ function initGame() {
                 tower.angle = Math.sin(tower.idleSweep * 0.6) * 0.5;
             }
 
+            if (isBeam) {
+                // Beam weapons skip the cooldown/single-shot model entirely:
+                // no projectile, just continuous damage-per-second applied
+                // every frame the target stays locked in range.
+                if (target) {
+                    target.hp -= tower.damage * deltaSeconds;
+                    tower.beamActive = true;
+                    tower.beamTargetX = target.x;
+                    tower.beamTargetY = target.y;
+                } else {
+                    tower.beamActive = false;
+                }
+
+                return;
+            }
+
             if (target && tower.cooldown <= 0) {
-                target.hp -= tower.damage;
                 tower.cooldown = tower.fireInterval;
                 tower.fireTtl = 0.12;
-                spawnProjectile(tower, target);
+
+                audio.playShoot();
+
+                if (type?.multi_target) {
+                    // Multi-attack: jumps to up to 3 of the nearest enemies
+                    // in range at once instead of a single target.
+                    enemiesInRange
+                        .slice()
+                        .sort((a, b) => a.distance - b.distance)
+                        .slice(0, 3)
+                        .forEach(({ enemy }) => {
+                            enemy.hp -= tower.damage;
+                            spawnProjectile(tower, enemy);
+                        });
+                } else if (type?.splash_damage) {
+                    // Splash damage: everything within the blast radius around
+                    // the impact point takes damage, not just the direct hit.
+                    const splashRadius = map.tile_size * 1.1;
+
+                    enemies.forEach((enemy) => {
+                        if (towerCanTarget(type, enemy) && Math.hypot(enemy.x - target.x, enemy.y - target.y) <= splashRadius) {
+                            enemy.hp -= tower.damage;
+                        }
+                    });
+
+                    spawnProjectile(tower, target);
+                } else {
+                    target.hp -= tower.damage;
+                    spawnProjectile(tower, target);
+                }
             }
         });
     }
@@ -1168,7 +1441,20 @@ function initGame() {
             const progress = Math.min(1, projectile.t / projectile.duration);
             projectile.x = projectile.startX + (projectile.targetX - projectile.startX) * progress;
             projectile.y = projectile.startY + (projectile.targetY - projectile.startY) * progress;
-            return projectile.t < projectile.duration;
+            const arrived = projectile.t >= projectile.duration;
+
+            if (arrived && projectile.explodesOnArrival) {
+                spawnExplosion(projectile.targetX, projectile.targetY, map.tile_size * 1.1);
+            }
+
+            return !arrived;
+        });
+    }
+
+    function updateExplosions(deltaSeconds) {
+        explosions = explosions.filter((explosion) => {
+            explosion.t += deltaSeconds;
+            return explosion.t < explosion.duration;
         });
     }
 
@@ -1255,7 +1541,10 @@ function initGame() {
 
         const flash = type.muzzleFlashImage;
 
-        if (tower.fireTtl > 0 && flash?.complete && flash.naturalWidth) {
+        // Beam weapons keep their emitter glow lit for as long as they're
+        // actively firing, not just the brief flash window discrete-shot
+        // towers get.
+        if ((tower.fireTtl > 0 || tower.beamActive) && flash?.complete && flash.naturalWidth) {
             ctx.drawImage(flash, -32 * TOWER_PIVOT_FRACTION.x * scale, -32 * TOWER_PIVOT_FRACTION.y * scale, size, size);
         }
 
@@ -1263,6 +1552,16 @@ function initGame() {
 
         return true;
     }
+
+    // Upgrading a tower only changes its stats (see TowerUpgrades on the
+    // server) — there's no separate art per level. A level-tinted glow
+    // wrapped around the whole draw call is what makes an upgraded tower
+    // actually read as stronger on the battlefield, without needing new
+    // sprites per tier.
+    const TOWER_LEVEL_GLOW = {
+        2: { color: 'rgba(250,204,21,0.75)', blur: 6, saturate: 1.15 },
+        3: { color: 'rgba(249,115,22,0.85)', blur: 10, saturate: 1.35 },
+    };
 
     function drawTower(tower) {
         if (tower === selectedTower) {
@@ -1277,6 +1576,13 @@ function initGame() {
 
         const type = towerTypes[tower.typeCode];
         const size = towerRenderSize(type);
+        const glow = TOWER_LEVEL_GLOW[tower.level];
+
+        ctx.save();
+
+        if (glow) {
+            ctx.filter = `drop-shadow(0 0 ${glow.blur}px ${glow.color}) saturate(${glow.saturate})`;
+        }
 
         if (!drawTowerHead(tower, type ?? {}, size) && !drawSprite(type?.image, tower.x, tower.y, size)) {
             ctx.fillStyle = '#4b5563';
@@ -1284,6 +1590,29 @@ function initGame() {
             ctx.arc(tower.x, tower.y, map.tile_size * 0.28, 0, Math.PI * 2);
             ctx.fill();
         }
+
+        if (tower.beamActive) {
+            const tip = towerMuzzleTip(tower, type);
+
+            ctx.strokeStyle = '#5eead4';
+            ctx.lineWidth = 3;
+            ctx.globalAlpha = 0.35;
+            ctx.beginPath();
+            ctx.moveTo(tip.x, tip.y);
+            ctx.lineTo(tower.beamTargetX, tower.beamTargetY);
+            ctx.stroke();
+
+            ctx.strokeStyle = '#f0fdfa';
+            ctx.lineWidth = 1.2;
+            ctx.globalAlpha = 0.95;
+            ctx.beginPath();
+            ctx.moveTo(tip.x, tip.y);
+            ctx.lineTo(tower.beamTargetX, tower.beamTargetY);
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+        }
+
+        ctx.restore();
     }
 
     function drawEnemies() {
@@ -1417,6 +1746,41 @@ function initGame() {
         });
     }
 
+    // Expanding, fading fireball + shockwave ring — pure canvas, no sprite
+    // asset needed, so it can't collide with the other session's tower/enemy art.
+    function drawExplosions() {
+        explosions.forEach((explosion) => {
+            const progress = explosion.t / explosion.duration;
+            const easedOut = 1 - Math.pow(1 - progress, 2);
+            const coreRadius = explosion.radius * (0.35 + easedOut * 0.65);
+            const ringRadius = explosion.radius * (0.5 + progress * 0.9);
+
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, 1 - progress);
+
+            const gradient = ctx.createRadialGradient(
+                explosion.x, explosion.y, 0,
+                explosion.x, explosion.y, coreRadius
+            );
+            gradient.addColorStop(0, 'rgba(255, 241, 189, 0.95)');
+            gradient.addColorStop(0.45, 'rgba(251, 146, 60, 0.85)');
+            gradient.addColorStop(1, 'rgba(239, 68, 68, 0)');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(explosion.x, explosion.y, coreRadius, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.globalAlpha = Math.max(0, (1 - progress) * 0.8);
+            ctx.strokeStyle = 'rgba(254, 215, 170, 0.9)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(explosion.x, explosion.y, ringRadius, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.restore();
+        });
+    }
+
     let lastTime = null;
 
     function loop(time) {
@@ -1440,11 +1804,15 @@ function initGame() {
         drawBuildSpots();
         drawTowerPlacementPreview();
 
-        if (!gameOver && !victory) {
-            updateWaveSpawning(deltaSeconds);
-            updateEnemies(deltaSeconds);
-            updateTowers(deltaSeconds);
-            updateProjectiles(deltaSeconds);
+        if (!gameOver && !victory && !isPaused) {
+            // Only the gameplay simulation speeds up on 2x — camera pan stays
+            // at real-time so fast-forwarding doesn't also fling the view.
+            const simDelta = deltaSeconds * gameSpeed;
+            updateWaveSpawning(simDelta);
+            updateEnemies(simDelta);
+            updateTowers(simDelta);
+            updateProjectiles(simDelta);
+            updateExplosions(simDelta);
         }
 
         refreshSelectionPopup();
@@ -1452,6 +1820,7 @@ function initGame() {
         drawGroundLevelEntities();
         drawEnemies();
         drawProjectiles();
+        drawExplosions();
 
         ctx.restore();
 
@@ -1476,6 +1845,14 @@ function initGame() {
         waveActive = false;
         spawnQueueRemaining = 0;
         spawnTimer = 0;
+        enemiesKilled = 0;
+        goldEarned = 0;
+        isPaused = false;
+
+        if (pauseButton) {
+            pauseButton.textContent = 'Pause';
+            pauseButton.classList.remove('border-emerald-400', 'bg-emerald-500/20', 'text-emerald-200');
+        }
 
         livesEl.textContent = String(lives);
         updateGoldDisplay();
@@ -1487,6 +1864,7 @@ function initGame() {
         waveButton.classList.remove('hidden');
         waveButton.disabled = false;
         waveButton.textContent = 'Start wave 1';
+        updateWavePreview();
     }
 
     waveButton?.addEventListener('click', startWave);

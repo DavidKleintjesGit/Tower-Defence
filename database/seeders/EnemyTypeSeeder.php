@@ -9,14 +9,14 @@ class EnemyTypeSeeder extends Seeder
 {
     public function run(): void
     {
-        EnemyType::whereNotIn('code', ['alien', 'proefpersoon', 'slijmmonster', 'boss-groene-kolos'])->delete();
+        EnemyType::whereNotIn('code', ['alien', 'proefpersoon', 'slijmmonster', 'boss-groene-kolos', 'rogue-sentry', 'boss-fusion-horror', 'boss-mothership-drone'])->delete();
 
         $enemyTypes = [
             [
                 'code' => 'alien',
                 'name' => 'Alien',
-                'tagline' => 'Weg voor je "halt" kan roepen.',
-                'description' => 'Ontsnapt uit een neergestort schijfje bij Hangar 3. Grijze huid, veel te grote ogen, en een groene bio-gloed die nooit helemaal uitgaat.',
+                'tagline' => 'Gone before you can shout "halt."',
+                'description' => 'Escaped from a crashed saucer near Hangar 3. Gray skin, eyes far too big, and a green bio-glow that never fully fades.',
                 'hp' => 40,
                 'speed_multiplier' => 1.1,
                 'bounty' => 12,
@@ -32,9 +32,9 @@ class EnemyTypeSeeder extends Seeder
             ],
             [
                 'code' => 'proefpersoon',
-                'name' => 'Ontsnapte Proefpersoon',
-                'tagline' => 'Wat ze injecteerden, werkte te goed.',
-                'description' => 'Voormalig testsubject uit Lab 9, opgevoerd met militaire cybernetica. Sterker en gepantserder dan de gemiddelde indringer.',
+                'name' => 'Escaped Test Subject',
+                'tagline' => 'Whatever they injected worked too well.',
+                'description' => 'Former test subject from Lab 9, augmented with military cybernetics. Stronger and better armored than your average intruder.',
                 'hp' => 55,
                 'speed_multiplier' => 1.05,
                 'bounty' => 15,
@@ -50,9 +50,9 @@ class EnemyTypeSeeder extends Seeder
             ],
             [
                 'code' => 'slijmmonster',
-                'name' => 'Slijmmonster',
-                'tagline' => 'Trage druip. Onmogelijk klein te krijgen.',
-                'description' => 'Ontsnapt bio-experiment uit Lab 7, een levende gelatinemassa die zich door ventilatieroosters perst.',
+                'name' => 'Slime Monster',
+                'tagline' => 'Slow drip. Impossible to wear down.',
+                'description' => 'Escaped bio-experiment from Lab 7, a living mass of gelatin that squeezes through ventilation grates.',
                 'hp' => 90,
                 'speed_multiplier' => 0.75,
                 'bounty' => 20,
@@ -68,9 +68,10 @@ class EnemyTypeSeeder extends Seeder
             ],
             [
                 'code' => 'boss-groene-kolos',
-                'name' => 'Groene Kolos',
-                'tagline' => 'De grond dreunt voor hij er is.',
-                'description' => 'Het mislukte topexperiment van Lab 1 — een menselijk proefsubject dat de dosis overleefde en er alleen maar groter en woedender van werd.',
+                'name' => 'Green Colossus',
+                'tagline' => 'The ground shakes before he arrives.',
+                'description' => 'Lab 1\'s failed flagship experiment — a human test subject who survived the dose and only grew bigger and angrier because of it.',
+                'is_boss' => true,
                 'hp' => 400,
                 'speed_multiplier' => 0.55,
                 'bounty' => 100,
@@ -82,6 +83,65 @@ class EnemyTypeSeeder extends Seeder
                     $this->bossFrame(0),
                     $this->bossFrame(-14),
                     $this->bossFrame(0),
+                ],
+            ],
+            [
+                'code' => 'rogue-sentry',
+                'name' => 'Rogue Sentry',
+                'tagline' => 'Its orders expired. It didn\'t.',
+                'description' => 'A base-security drone that stopped taking commands from anyone but itself. Still patrols like it means it.',
+                'hp' => 65,
+                'speed_multiplier' => 0.95,
+                'bounty' => 16,
+                'render_scale' => 1,
+                'color' => '#4b5563',
+                'sprite' => $this->rogueSentryFrame(0),
+                'walk_frames' => [
+                    $this->rogueSentryFrame(10),
+                    $this->rogueSentryFrame(0),
+                    $this->rogueSentryFrame(-10),
+                    $this->rogueSentryFrame(0),
+                ],
+            ],
+            [
+                'code' => 'boss-fusion-horror',
+                'name' => 'Fusion Horror',
+                'tagline' => 'Three subjects went in. One thing came out.',
+                'description' => 'Lab 1\'s other failed experiment — several test subjects fused into a single furious mass, memories included.',
+                'is_boss' => true,
+                'hp' => 350,
+                'speed_multiplier' => 0.5,
+                'bounty' => 90,
+                'render_scale' => 2,
+                'color' => '#7c2d5e',
+                'sprite' => $this->fusionHorrorFrame(0),
+                'walk_frames' => [
+                    $this->fusionHorrorFrame(14),
+                    $this->fusionHorrorFrame(0),
+                    $this->fusionHorrorFrame(-14),
+                    $this->fusionHorrorFrame(0),
+                ],
+            ],
+            [
+                'code' => 'boss-mothership-drone',
+                'name' => 'Mothership Drone',
+                'tagline' => 'It didn\'t come alone, and it isn\'t leaving that way either.',
+                'description' => 'A recovered saucer core, reactivated and airborne again. Every few seconds it beams down another passenger.',
+                'is_boss' => true,
+                'domain' => 'air',
+                'spawns_code' => 'alien',
+                'spawn_interval' => 7,
+                'hp' => 300,
+                'speed_multiplier' => 0.5,
+                'bounty' => 120,
+                'render_scale' => 2,
+                'color' => '#6d28d9',
+                'sprite' => $this->mothershipDroneFrame(0),
+                'walk_frames' => [
+                    $this->mothershipDroneFrame(0),
+                    $this->mothershipDroneFrame(90),
+                    $this->mothershipDroneFrame(180),
+                    $this->mothershipDroneFrame(270),
                 ],
             ],
         ];
@@ -231,6 +291,101 @@ class EnemyTypeSeeder extends Seeder
             <circle cx="22.4" cy="8.4" r="0.4" fill="#bbf7d0"/>
             <path d="M17 11.4c1 0.8 2 0.8 3 0" stroke="#052e16" stroke-width="0.8" fill="none"/>
             <ellipse cx="20" cy="22" rx="9" ry="3" fill="#000000" opacity="0.15"/>
+            SVG;
+
+        return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" shape-rendering="crispEdges">'.$inner.'</svg>';
+    }
+
+    /**
+     * Walk-cycle frame for the Rogue Sentry: a boxy security-robot torso on
+     * two mechanical legs (same hip-pivot rotation trick, just rectangular
+     * "servo" legs instead of organic ones), with a single red optical
+     * sensor and a spark that flickers brighter mid-stride.
+     */
+    private function rogueSentryFrame(float $legAngle): string
+    {
+        $spark = abs($legAngle) > 5 ? 1 : 0.3;
+
+        return $this->svg(<<<SVG
+            <ellipse cx="16" cy="28" rx="7" ry="2" fill="#000000" opacity="0.25"/>
+            <g transform="rotate({$legAngle} 13 22)"><rect x="11.5" y="21" width="3" height="7" fill="#4b5563"/><rect x="10.5" y="27" width="5" height="1.6" fill="#374151"/></g>
+            <g transform="rotate(-{$legAngle} 19 22)"><rect x="17.5" y="21" width="3" height="7" fill="#4b5563"/><rect x="16.5" y="27" width="5" height="1.6" fill="#374151"/></g>
+            <rect x="10" y="10" width="12" height="12" rx="1" fill="#4b5563"/>
+            <rect x="10" y="10" width="12" height="3" fill="#6b7280"/>
+            <rect x="10" y="10" width="12" height="12" rx="1" fill="none" stroke="#1f2937" stroke-width="0.6"/>
+            <circle cx="16" cy="16" r="2.4" fill="#111827"/>
+            <circle cx="16" cy="16" r="1.3" fill="#ef4444" opacity="0.9"/>
+            <rect x="12" y="19" width="3" height="1.2" fill="#1f2937"/>
+            <polygon points="19,18 21,19 19.5,19.6 20.5,20.6" fill="#fbbf24" opacity="{$spark}"/>
+            <ellipse cx="16" cy="20.5" rx="6.5" ry="2.2" fill="#000000" opacity="0.18"/>
+            SVG);
+    }
+
+    /**
+     * Walk-cycle frame for the Fusion Horror boss: an asymmetric fused mass
+     * on a bigger 40x40 canvas (same convention as the Groene Kolos) —
+     * mismatched arm sizes and multiple glowing eyes at different scales
+     * sell the "several subjects merged together" idea, in a completely
+     * different palette (dark red-purple) from the green colossus.
+     */
+    private function fusionHorrorFrame(float $legAngle): string
+    {
+        $glow = round(0.5 + 0.3 * abs(sin(deg2rad($legAngle))), 2);
+        $armAngle = round($legAngle * 0.6, 2);
+
+        $inner = <<<SVG
+            <ellipse cx="20" cy="36" rx="12" ry="2.6" fill="#000000" opacity="0.3"/>
+            <g transform="rotate({$legAngle} 15 27)"><rect x="13" y="25" width="4.4" height="10" fill="#4a1030"/><rect x="12" y="34" width="6.4" height="2.4" fill="#2e0a1e"/></g>
+            <g transform="rotate(-{$legAngle} 25 27)"><rect x="22.6" y="25" width="4.4" height="10" fill="#5b1a3d"/><rect x="21.6" y="34" width="6.4" height="2.4" fill="#2e0a1e"/></g>
+            <ellipse cx="19" cy="21" rx="12" ry="9" fill="#5b1a3d"/>
+            <ellipse cx="22" cy="20" rx="8" ry="7" fill="#7c2d5e"/>
+            <path d="M14 23l3 2M26 22l-2.5 2.5M18 27l2 1.6" stroke="#f97316" stroke-width="0.6" opacity="{$glow}"/>
+            <g transform="rotate({$armAngle} 7 20)"><ellipse cx="7" cy="18" rx="3.2" ry="4.6" fill="#4a1030"/><ellipse cx="6" cy="25" rx="2.8" ry="3.4" fill="#2e0a1e"/></g>
+            <g transform="rotate(-{$armAngle} 33 19)"><ellipse cx="33" cy="17" rx="3" ry="4.2" fill="#5b1a3d"/><ellipse cx="34" cy="24" rx="2.6" ry="3.2" fill="#2e0a1e"/></g>
+            <ellipse cx="14" cy="13" rx="3.6" ry="3.2" fill="#5b1a3d"/>
+            <ellipse cx="13.2" cy="12.6" rx="0.9" ry="1.1" fill="#a3e635"/>
+            <ellipse cx="25" cy="10" rx="5.2" ry="4.6" fill="#7c2d5e"/>
+            <ellipse cx="23.4" cy="9.6" rx="1.1" ry="1.4" fill="#a3e635"/>
+            <ellipse cx="27" cy="9.6" rx="1.1" ry="1.4" fill="#a3e635"/>
+            <circle cx="23.4" cy="9.6" r="0.35" fill="#f7fee7"/>
+            <circle cx="27" cy="9.6" r="0.35" fill="#f7fee7"/>
+            <ellipse cx="20" cy="22" rx="9" ry="3" fill="#000000" opacity="0.2"/>
+            SVG;
+
+        return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" shape-rendering="crispEdges">'.$inner.'</svg>';
+    }
+
+    /**
+     * Hover-loop frame for the Mothership Drone boss: no legs — instead the
+     * whole saucer bobs vertically (same idea as a small flying enemy would,
+     * just much bigger), with a pulsing green underbelly core and glowing
+     * cockpit dome. This is the enemy the spawner mechanic (spawns_code
+     * 'alien' every spawn_interval seconds, see EnemyTypeSeeder/run()) is
+     * attached to, and the first 'air' domain enemy in the roster.
+     */
+    private function mothershipDroneFrame(float $phaseDeg): string
+    {
+        $rad = deg2rad($phaseDeg);
+        $bob = round(sin($rad) * 1.2, 2);
+        $glow = round(0.5 + 0.3 * abs(sin($rad)), 2);
+        $cy = round(18 + $bob, 2);
+        $cyGlow = round($cy + 12, 2);
+        $cyRimLow = round($cy + 4.5, 2);
+        $cyRimHigh = round($cy + 3, 2);
+        $cyDomeLow = round($cy - 2, 2);
+        $cyDome = round($cy - 3.5, 2);
+
+        $inner = <<<SVG
+            <ellipse cx="20" cy="34" rx="11" ry="2.4" fill="#000000" opacity="0.3"/>
+            <ellipse cx="20" cy="{$cyGlow}" rx="7" ry="2.2" fill="#4ade80" opacity="{$glow}"/>
+            <ellipse cx="20" cy="{$cyRimLow}" rx="16" ry="4.4" fill="#2e1065"/>
+            <ellipse cx="20" cy="{$cyRimHigh}" rx="15" ry="4" fill="#4c1d95"/>
+            <ellipse cx="20" cy="{$cy}" rx="10" ry="5.5" fill="#6d28d9"/>
+            <ellipse cx="16" cy="{$cyDomeLow}" rx="4" ry="2.6" fill="#a78bfa" opacity="0.5"/>
+            <ellipse cx="20" cy="{$cyDome}" rx="6" ry="5" fill="#1e0838"/>
+            <circle cx="20" cy="{$cyDome}" r="2.6" fill="#4ade80" opacity="{$glow}"/>
+            <circle cx="10" cy="{$cyRimLow}" r="0.7" fill="#f97316" opacity="0.8"/>
+            <circle cx="30" cy="{$cyRimLow}" r="0.7" fill="#f97316" opacity="0.8"/>
             SVG;
 
         return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" shape-rendering="crispEdges">'.$inner.'</svg>';
